@@ -8,6 +8,17 @@
   <!-- 引入 Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- 新增物理震动动画 -->
+  <style>
+    @keyframes tremble {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(-3deg) scale(1.02); }
+      75% { transform: rotate(3deg) scale(0.98); }
+    }
+    .animate-tremble { animation: tremble 1.5s ease-in-out infinite; }
+    .animate-tremble-fast { animation: tremble 0.3s ease-in-out infinite; }
+  </style>
+
   <!-- 配置 ES Modules 依赖项 (核心：将现代模块暴露给浏览器) -->
   <script type="importmap">
     {
@@ -35,7 +46,7 @@
     import { Play, Square, Camera, CameraOff, Check, X, Award, Plus, Swords, ArrowLeft, Settings, Trophy, BookOpen, Lock, Sparkles, ScanText, Activity, Music, Loader2 } from 'lucide-react';
     import { initializeApp } from 'firebase/app';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-    import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+    import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, serverTimestamp, increment } from 'firebase/firestore';
 
     // ==========================================
     // 核心配置区 (在 GitHub 上线前必须修改此处)
@@ -207,6 +218,40 @@
         nextXp: isMaxLevel ? null : LEVEL_THRESHOLDS[levelIndex],
         prevXp: LEVEL_THRESHOLDS[levelIndex - 1]
       };
+    };
+
+    // ==========================================
+    // 动态裂缝渲染组件
+    // ==========================================
+    const EggCrackOverlay = ({ level }) => {
+      if (level <= 1) return null;
+      let opacity = 0;
+      let filter = 'drop-shadow(1px 1px 0px rgba(255,255,255,0.3))';
+      let paths = [];
+
+      // Lv.2 颤动的蛋：出现基础裂纹
+      if (level >= 2) {
+         opacity = 0.6;
+         paths.push(<path key="1" d="M48,20 L45,35 L55,50 L45,70" fill="none" stroke="#4a3f35" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />);
+      }
+      // Lv.3 裂缝的蛋：侧边深度龟裂
+      if (level >= 3) {
+         opacity = 0.85;
+         paths.push(<path key="2" d="M55,50 L68,60 L62,80" fill="none" stroke="#4a3f35" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />);
+      }
+      // Lv.4 发光的蛋：即将破壳，裂缝透出强烈金光
+      if (level >= 4) {
+         opacity = 1;
+         filter = 'drop-shadow(0 0 8px rgba(251,191,36,0.9))'; 
+         paths.push(<path key="3" d="M45,35 L28,40 L32,55" fill="none" stroke="#4a3f35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />);
+         paths.push(<path key="4" d="M45,70 L35,85" fill="none" stroke="#4a3f35" strokeWidth="2" strokeLinecap="round" />);
+      }
+
+      return (
+        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none z-10 scale-[0.75]" style={{ opacity, filter, transition: 'all 0.5s ease' }}>
+           {paths}
+        </svg>
+      );
     };
 
     function App() {
@@ -389,8 +434,9 @@
                 <button key={kid.id} onClick={() => onSelectKid(kid.id)}
                   className="bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-indigo-400 flex flex-col items-center text-center transform hover:-translate-y-2 active:scale-95 group"
                 >
-                  <div className={`${state.color} w-40 h-40 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner transition-transform group-hover:scale-105 ${state.isMaxLevel ? 'animate-pulse ring-4 ring-amber-300' : ''}`}>
-                    {state.emoji}
+                  <div className={`${state.color} w-40 h-40 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner transition-transform group-hover:scale-105 relative ${state.isMaxLevel ? 'animate-pulse ring-4 ring-amber-300' : state.level === 4 ? 'animate-tremble-fast ring-2 ring-amber-200' : state.level === 3 ? 'animate-tremble' : ''}`}>
+                    <span className="relative z-0">{state.emoji}</span>
+                    <EggCrackOverlay level={state.level} />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-800 mb-2">{kid.name}</h3>
                   <p className="text-md font-medium text-indigo-600 mb-3">Lv.{state.level} {state.name}</p>
@@ -437,7 +483,7 @@
       const [showCamera, setShowCamera] = useState(false);
       const [showPostureCheck, setShowPostureCheck] = useState(false);
       const [message, setMessage] = useState(`专心看谱，魔法镜已准备就绪。`);
-      const [checkInterval, setCheckInterval] = useState(45); 
+      const [checkInterval, setCheckInterval] = useState(300); // 改为 300 秒（5分钟）检查一次
       const [localCombo, setLocalCombo] = useState(kid.comboCount || 0);
 
       const [showAnalyzer, setShowAnalyzer] = useState(false);
@@ -448,6 +494,7 @@
 
       const [sheetMusicData, setSheetMusicData] = useState(null);
       const fileInputRef = useRef(null);
+      const checkTimeoutRef = useRef(null);
 
       const { bpm, setBpm, isPlaying: metronomePlaying, setIsPlaying: setMetronomePlaying } = useMetronome();
 
@@ -455,9 +502,51 @@
       const streamRef = useRef(null);
       const state = getIncubationState(kid.currentEggType, kid.currentEggXp || 0);
 
+      const playChime = useCallback(() => {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 1.5);
+        } catch(e) {}
+      }, []);
+
+      const triggerPostureCheck = useCallback(() => {
+        setShowPostureCheck(true);
+        setMessage("🛑 突击检查！余光看手型！");
+        playChime();
+
+        if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
+        
+        // 4秒后自动消失并结算奖励（不打断练琴流程）
+        checkTimeoutRef.current = setTimeout(() => {
+          setShowPostureCheck(false);
+          setLocalCombo(prev => {
+            const newCombo = prev + 1;
+            const bonus = Math.min(newCombo * 5, 25);
+            const kidRef = doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id);
+            updateDoc(kidRef, { 
+              currentEggXp: increment(15 + bonus), 
+              comboCount: newCombo 
+            }).catch(console.error);
+            setMessage(`完美保持！连击 ${newCombo} 次！奖励 ${15 + bonus} XP！🔥`);
+            return newCombo;
+          });
+        }, 4000);
+      }, [db, appId, userId, kid.id, playChime]);
+
       useEffect(() => {
         let interval;
-        if (isPracticing && !showPostureCheck && !state.isMaxLevel) {
+        // 仅依靠 isPracticing 判断，即使在展示浮窗时不暂停 sessionTime，确保计时连续
+        if (isPracticing && !state.isMaxLevel) {
           interval = setInterval(() => {
             setSessionTime(p => {
               const newTime = p + 1;
@@ -466,21 +555,19 @@
             });
 
             if (sessionTime > 0 && sessionTime % 5 === 0) {
-               updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id), { currentEggXp: (kid.currentEggXp || 0) + 5 }).catch(console.error);
+               updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id), { currentEggXp: increment(5) }).catch(console.error);
             }
           }, 1000);
         }
         return () => clearInterval(interval);
-      }, [isPracticing, showPostureCheck, sessionTime, checkInterval, kid.currentEggXp, kid.id, userId, state.isMaxLevel]);
+      }, [isPracticing, sessionTime, checkInterval, kid.id, userId, state.isMaxLevel, triggerPostureCheck]);
 
       useEffect(() => {
-        return () => { if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop()); };
+        return () => { 
+          if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop()); 
+          if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
+        };
       }, []);
-
-      const triggerPostureCheck = () => {
-        setShowPostureCheck(true);
-        setMessage("🛑 突击检查手型！");
-      };
 
       const startMagicMirror = () => {
         setShowCamera(true);
@@ -505,22 +592,12 @@
       const togglePractice = () => {
         if (state.isMaxLevel) return setMessage("当前蛋已满级，请先去图鉴孵化它！");
         setIsPracticing(!isPracticing);
-        setMessage(!isPracticing ? "练习中... 请保持正确的指法！" : "练习已暂停。");
-      };
-
-      const handlePostureResponse = async (success) => {
-        setShowPostureCheck(false);
-        const kidRef = doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id);
-        if (success) {
-          const newCombo = localCombo + 1;
-          setLocalCombo(newCombo);
-          const bonus = Math.min(newCombo * 5, 25);
-          await updateDoc(kidRef, { currentEggXp: (kid.currentEggXp || 0) + 30 + bonus, comboCount: newCombo }).catch(console.error);
-          setMessage(`完美手型！连击 ${newCombo} 次！奖励 ${30 + bonus} XP！🔥`);
+        if (isPracticing) {
+           setMessage("练习已暂停。");
+           setShowPostureCheck(false);
+           if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
         } else {
-          setLocalCombo(0);
-          await updateDoc(kidRef, { comboCount: 0 }).catch(console.error);
-          setMessage("没关系，手掌拱起来，像握着苹果，继续加油。");
+           setMessage("练习中... 请保持正确的指法！");
         }
       };
 
@@ -689,8 +766,9 @@
                     </div>
                   )}
 
-                  <div className={`text-[160px] filter drop-shadow-2xl ${state.isMaxLevel ? 'animate-pulse' : 'animate-bounce'}`} style={{ animationDuration: '3s' }}>
-                    {state.emoji}
+                  <div className={`text-[160px] filter drop-shadow-2xl relative flex items-center justify-center ${state.isMaxLevel ? 'animate-pulse' : state.level === 4 ? 'animate-tremble-fast' : state.level === 3 ? 'animate-tremble' : 'animate-bounce'}`} style={state.level >= 3 ? {} : { animationDuration: '3s' }}>
+                    <span className="relative z-0">{state.emoji}</span>
+                    <EggCrackOverlay level={state.level} />
                   </div>
                   
                   {state.isMaxLevel ? (
@@ -736,11 +814,10 @@
                 <p className="text-slate-600 mb-5 font-bold h-6">{message}</p>
                 <button
                   onClick={togglePractice}
-                  disabled={showPostureCheck || state.isMaxLevel}
+                  disabled={state.isMaxLevel}
                   className={`w-full flex items-center justify-center gap-3 py-6 rounded-2xl text-2xl font-black text-white transition-all transform active:scale-[0.98] ${
-                    showPostureCheck ? 'bg-slate-300' 
+                    state.isMaxLevel ? 'bg-slate-300 cursor-not-allowed'
                     : isPracticing ? 'bg-rose-500 shadow-rose-500/30 shadow-xl' 
-                    : state.isMaxLevel ? 'bg-slate-300 cursor-not-allowed'
                     : 'bg-emerald-500 shadow-emerald-500/30 shadow-xl'
                   }`}
                 >
@@ -751,18 +828,10 @@
           </div>
 
           {showPostureCheck && (
-            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-6 z-50">
-              <div className="bg-white rounded-[2rem] p-10 max-w-lg w-full text-center shadow-2xl animate-in zoom-in-95 duration-200">
-                <h2 className="text-4xl font-black text-slate-800 mb-4">手型检查！</h2>
-                <p className="text-slate-600 mb-10 text-xl font-bold bg-slate-50 py-4 rounded-xl">双手定住！低头看看...<br/>手里像握着苹果吗？</p>
-                <div className="flex gap-4">
-                  <button onClick={() => handlePostureResponse(true)} className="flex-1 bg-emerald-500 text-white py-6 rounded-2xl font-bold text-xl flex flex-col items-center gap-3 active:scale-95 shadow-lg shadow-emerald-500/30">
-                    <Check className="w-10 h-10" /> 完美握住
-                  </button>
-                  <button onClick={() => handlePostureResponse(false)} className="flex-1 bg-slate-100 text-slate-700 py-6 rounded-2xl font-bold text-xl flex flex-col items-center gap-3 active:scale-95 border-2 border-slate-200">
-                    <X className="w-10 h-10" /> 塌下去了
-                  </button>
-                </div>
+            <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50 animate-in fade-in duration-300">
+              <div className="bg-rose-500/90 text-white px-8 md:px-12 py-6 md:py-8 rounded-full shadow-2xl animate-bounce border-4 border-white/30 backdrop-blur-md flex items-center gap-4 text-center transform scale-110">
+                <span className="text-5xl md:text-6xl drop-shadow-lg">👀</span> 
+                <span className="text-3xl md:text-5xl font-black tracking-widest drop-shadow-md">坐直！握苹果！</span>
               </div>
             </div>
           )}
