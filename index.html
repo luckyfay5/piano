@@ -1,1130 +1,902 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>钢琴宠物图鉴</title>
-  
-  <!-- 引入 Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- 新增物理震动动画 -->
-  <style>
-    @keyframes tremble {
-      0%, 100% { transform: rotate(0deg) scale(1); }
-      25% { transform: rotate(-3deg) scale(1.02); }
-      75% { transform: rotate(3deg) scale(0.98); }
-    }
-    .animate-tremble { animation: tremble 1.5s ease-in-out infinite; }
-    .animate-tremble-fast { animation: tremble 0.3s ease-in-out infinite; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎹 练琴星球</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #0f0a1e;
+  color: #fff;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  <!-- 配置 ES Modules 依赖项 (核心：将现代模块暴露给浏览器) -->
-  <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-        "lucide-react": "https://esm.sh/lucide-react@0.344.0",
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js",
-        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"
-      }
-    }
-  </script>
-  
-  <!-- 引入浏览器端 Babel 编译器 -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+#app { position: relative; z-index: 1; min-height: 100vh; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; }
+#view-content { flex: 1; overflow-y: auto; padding-bottom: 90px; }
+
+.starfield {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 20% 50%, #1a0533 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, #0d1a3a 0%, transparent 50%), #0f0a1e;
+}
+.starfield::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 70%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 15%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 72% 38%, rgba(255,255,255,.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 28% 62%, rgba(255,255,255,.45) 0%, transparent 100%);
+}
+
+.glass {
+  background: rgba(255,255,255,.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+}
+.glass-dark {
+  background: rgba(15,10,30,.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(167,139,250,.2);
+  border-radius: 20px;
+}
+
+.fredoka { font-family: 'Fredoka One', cursive; }
+
+@keyframes float     { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-12px) rotate(2deg)} }
+@keyframes wiggle    { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} }
+@keyframes shake     { 0%,100%{transform:translate(0,0) rotate(0)} 25%{transform:translate(-3px,0) rotate(-3deg)} 75%{transform:translate(3px,0) rotate(3deg)} }
+@keyframes crackglow { 0%,100%{filter:drop-shadow(0 0 8px #fbbf24)} 50%{filter:drop-shadow(0 0 22px #f59e0b)} }
+@keyframes popin     { 0%{transform:scale(0) rotate(-20deg);opacity:0} 70%{transform:scale(1.1) rotate(4deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+@keyframes shimmer   { 0%{background-position:-200% center} 100%{background-position:200% center} }
+@keyframes glowpulse { 0%,100%{box-shadow:0 0 20px rgba(167,139,250,.25)} 50%{box-shadow:0 0 42px rgba(167,139,250,.55)} }
+@keyframes combofly  { 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-55px);opacity:0} }
+@keyframes notefall  { from{transform:translateY(-70px);opacity:0} 6%{opacity:1} to{transform:translateY(var(--fd));opacity:1} }
+@keyframes notehit   { 0%{transform:scale(1);opacity:1} 60%{transform:scale(1.4);opacity:.6} 100%{transform:scale(.2);opacity:0} }
+
+.anim-float    { animation: float 3s ease-in-out infinite; }
+.anim-wiggle   { animation: wiggle .5s ease-in-out infinite; }
+.anim-shake    { animation: shake .3s ease-in-out infinite; }
+.anim-crack    { animation: crackglow 1.5s ease-in-out infinite; }
+.anim-popin    { animation: popin .5s cubic-bezier(.175,.885,.32,1.275) forwards; }
+.anim-glowpulse{ animation: glowpulse 2.2s ease-in-out infinite; }
+
+.progress-fill {
+  background: linear-gradient(90deg,#a78bfa,#f472b6,#a78bfa);
+  background-size: 200% auto;
+  animation: shimmer 2s linear infinite;
+  height: 100%; border-radius: 99px;
+  transition: width .5s ease;
+}
+
+.tab-bar  { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 50; }
+.tab-inner{ margin: 6px 10px; background: rgba(15,10,30,.88); backdrop-filter: blur(16px); border: 1px solid rgba(167,139,250,.2); border-radius: 20px; padding: 6px 4px; display: flex; gap: 2px; }
+.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px; cursor:pointer; border-radius:14px; transition:background .2s; user-select:none; }
+.tab-item.active { background: rgba(167,139,250,.15); }
+.tab-icon { font-size:20px; transition:transform .2s; }
+.tab-item.active .tab-icon { transform:scale(1.15); }
+.tab-label{ font-size:9px; font-weight:700; color:rgba(255,255,255,.35); transition:color .2s; }
+.tab-item.active .tab-label { color:#a78bfa; }
+
+.btn { border:none; cursor:pointer; font-family:inherit; font-weight:700; border-radius:14px; transition:transform .14s, opacity .14s; display:inline-flex; align-items:center; justify-content:center; }
+.btn:active { transform:scale(.95); }
+
+.hit-key { border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; user-select:none; border:2px solid; transition:all .1s; font-family:inherit; font-weight:800; padding:6px 2px; background:none; }
+.hit-key.pressed { filter:brightness(1.7); transform:scale(.92); box-shadow:0 0 18px currentColor; }
+
+.note-block { position:absolute; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; pointer-events:none; animation:notefall var(--fd-dur,2s) linear forwards; }
+
+.judgment-popup { position:fixed; left:50%; transform:translateX(-50%); font-weight:900; pointer-events:none; animation:combofly .85s ease forwards; white-space:nowrap; text-shadow:0 2px 8px rgba(0,0,0,.5); z-index:80; }
+
+.cal-day  { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+.cal-done { background:rgba(52,211,153,.2); color:#34d399; border:1px solid rgba(52,211,153,.3); }
+.cal-today{ outline:2px solid #a78bfa; }
+.cal-empty{ background:rgba(255,255,255,.04); color:rgba(255,255,255,.2); }
+
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.78); backdrop-filter:blur(8px); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
+
+.rarity-common { background:#374151; color:#9ca3af; }
+.rarity-rare   { background:#1d4ed8; color:#93c5fd; }
+.rarity-epic   { background:linear-gradient(135deg,#7c3aed,#db2777); color:#fff; }
+.rarity-legend { background:linear-gradient(135deg,#b45309,#d97706); color:#fef3c7; }
+
+input[type=range]{ accent-color:#a78bfa; cursor:pointer; }
+::-webkit-scrollbar{ width:5px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:rgba(167,139,250,.35); border-radius:99px; }
+</style>
 </head>
-<body class="bg-slate-50 touch-pan-y selection:bg-indigo-100">
-  <div id="root"></div>
+<body>
+<div class="starfield"></div>
+<div id="app">
+  <div id="view-content"></div>
+  <div class="tab-bar" id="tab-bar"></div>
+</div>
 
-  <!-- 主业务逻辑 (声明为 module 并由 babel 编译) -->
-  <script type="text/babel" data-type="module">
-    import React, { useState, useEffect, useRef, useCallback } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import { Play, Square, Camera, CameraOff, Check, X, Award, Plus, Swords, ArrowLeft, Settings, Trophy, BookOpen, Lock, Sparkles, ScanText, Activity, Music, Loader2 } from 'lucide-react';
-    import { initializeApp } from 'firebase/app';
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-    import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, serverTimestamp, increment } from 'firebase/firestore';
+<script>
+'use strict';
 
-    // ==========================================
-    // 核心配置区 (在 GitHub 上线前必须修改此处)
-    // ==========================================
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CONSTANTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const XP_LEVELS  = [0, 150, 400, 800, 1500];
+const EGG_STAGES = ['沉睡中','轻微颤动','出现裂缝','破壳前夕','✨ 满级'];
+const EGG_ANIMS  = ['anim-float','anim-wiggle','anim-wiggle','anim-shake','anim-crack'];
 
-    // 1. Firebase 配置
-    // 如果存在全局变量(平台环境)则优先使用，否则使用你填写的配置
-    const firebaseConfigStr = typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : null;
-    const firebaseConfig = firebaseConfigStr ? JSON.parse(firebaseConfigStr) : {
-      apiKey: "AIzaSyD9Gl4xEaXsKuseOe_-_1PO8LoRLUhgrSQ",
-      authDomain: "piano-705a0.firebaseapp.com",
-      projectId: "piano-705a0",
-      storageBucket: "piano-705a0.firebasestorage.app",
-      messagingSenderId: "1046701211994",
-      appId: "1:1046701211994:web:01ce8c7b4a089a97b83363"
-    };
+const NOTE_NAMES  = ['Do','Re','Mi','Fa','Sol','La','Si'];
+const NOTE_COLORS = ['#f87171','#fb923c','#fbbf24','#4ade80','#60a5fa','#a78bfa','#f472b6'];
+const NOTE_FREQS  = [261.63,293.66,329.63,349.23,392.00,440.00,493.88];
+const KEY_LABELS  = ['A','S','D','F','G','H','J'];
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+const TIPS = [
+  '慢速练习是进步最快的方式，先把每个音弹准确再提速。',
+  '新曲子先单手练，左右手都熟了再合并。',
+  '练习前先听一遍整首曲子，建立对音乐的整体感受。',
+  '遇到困难的地方，单独截出来反复练习，攻克它！',
+  '保持手腕放松，不要紧绷——想象手心里握着一个苹果。',
+  '每次练完，试试从头到尾完整弹一遍，培养演奏感。',
+  '节拍器是你最好的朋友，哪怕很慢也要跟着拍子弹。',
+];
 
-    // (此处已彻底删除明文的 Gemini API Key，交由 Vercel 后端环境托管)
+const SONGS = [
+  { name:'自由模式（随机无限）', seq: null },
+  { name:'小星星', seq:[0,0,4,4,5,5,4,3,3,2,2,1,1,0,4,4,3,3,2,2,1,4,4,3,3,2,2,1,0,0,4,4,5,5,4,3,3,2,2,1,1,0] },
+  { name:'玛丽有只小羊羔', seq:[2,1,0,1,2,2,2,1,1,1,2,4,4,2,1,0,1,2,2,2,2,1,1,2,1,0] },
+  { name:'生日快乐', seq:[0,0,1,0,3,2,0,0,1,0,4,3,0,0,0,5,3,2,1,6,6,5,3,4,3] },
+];
 
-    // ==========================================
-    // 节拍器引擎 (使用 AudioContext 确保精准)
-    // ==========================================
-    const useMetronome = () => {
-      const [bpm, setBpm] = useState(120);
-      const [isPlaying, setIsPlaying] = useState(false);
-      const audioCtxRef = useRef(null);
-      const intervalRef = useRef(null);
-      const nextNoteTimeRef = useRef(0);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PET DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const PETS_R = {
+  common: [
+    {id:'c1',emoji:'🐱',name:'音符小猫',  color:'#8b5cf6',power:80},
+    {id:'c2',emoji:'🐰',name:'节拍兔',    color:'#ec4899',power:90},
+    {id:'c3',emoji:'🐸',name:'哼歌青蛙',  color:'#10b981',power:85},
+    {id:'c4',emoji:'🐹',name:'练习仓鼠',  color:'#f59e0b',power:75},
+    {id:'c5',emoji:'🦔',name:'刺猬琴手',  color:'#6366f1',power:88},
+  ],
+  rare: [
+    {id:'r1',emoji:'🦊',name:'魔法赤狐',    color:'#f97316',power:220},
+    {id:'r2',emoji:'🦋',name:'旋律蝴蝶',    color:'#a78bfa',power:240},
+    {id:'r3',emoji:'🐬',name:'海豚音姬',    color:'#06b6d4',power:210},
+    {id:'r4',emoji:'🦉',name:'夜曲猫头鹰',  color:'#8b5cf6',power:250},
+  ],
+  epic: [
+    {id:'e1',emoji:'🐉',name:'韵律龙王',   color:'#7c3aed',power:600},
+    {id:'e2',emoji:'🦄',name:'星光独角兽', color:'#ec4899',power:650},
+    {id:'e3',emoji:'🔥',name:'烈焰凤凰',   color:'#ef4444',power:700},
+  ],
+  legend: [
+    {id:'l1',emoji:'✨',name:'宇宙乐神', color:'#fbbf24',power:1500},
+  ],
+};
+const ALL_PETS = [...PETS_R.common,...PETS_R.rare,...PETS_R.epic,...PETS_R.legend];
 
-      const playClick = useCallback((time) => {
-        if (!audioCtxRef.current) return;
-        const osc = audioCtxRef.current.createOscillator();
-        const gainNode = audioCtxRef.current.createGain();
-        
-        osc.connect(gainNode);
-        gainNode.connect(audioCtxRef.current.destination);
-        
-        osc.frequency.value = 800;
-        osc.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(1, time);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
-        
-        osc.start(time);
-        osc.stop(time + 0.1);
-      }, []);
+function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function petById(id){ return ALL_PETS.find(p=>p.id===id); }
+function drawPet(streak){
+  const r = Math.random() + streak*0.01;
+  if(r>1.08) return PETS_R.legend[0];
+  if(r>0.85) return rnd(PETS_R.epic);
+  if(r>0.55) return rnd(PETS_R.rare);
+  return rnd(PETS_R.common);
+}
+function hexRgb(hex){
+  return parseInt(hex.slice(1,3),16)+','+parseInt(hex.slice(3,5),16)+','+parseInt(hex.slice(5,7),16);
+}
 
-      const scheduler = useCallback(() => {
-        while (nextNoteTimeRef.current < audioCtxRef.current.currentTime + 0.1) {
-          playClick(nextNoteTimeRef.current);
-          nextNoteTimeRef.current += 60.0 / bpm;
-        }
-      }, [bpm, playClick]);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function defaultState(){
+  return { name:'', eggXp:0, totalMinutes:0, streak:0, lastPracticeDate:'',
+           collectedPets:[], checkinDays:[], gameHighScore:0,
+           settings:{ bpm:90, checkInterval:300 } };
+}
+let S = (()=>{
+  try{ const r=localStorage.getItem('piano_pet_v3'); if(r) return JSON.parse(r); }catch(_){}
+  return defaultState();
+})();
+function save(){ try{ localStorage.setItem('piano_pet_v3',JSON.stringify(S)); }catch(_){} }
 
-      useEffect(() => {
-        if (isPlaying) {
-          if (!audioCtxRef.current) {
-            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-          }
-          if (audioCtxRef.current.state === 'suspended') {
-            audioCtxRef.current.resume();
-          }
-          nextNoteTimeRef.current = audioCtxRef.current.currentTime + 0.05;
-          intervalRef.current = setInterval(scheduler, 25);
-        } else {
-          clearInterval(intervalRef.current);
-        }
-        return () => clearInterval(intervalRef.current);
-      }, [isPlaying, scheduler]);
+function eggLevel(){
+  let lv=0;
+  for(let i=0;i<XP_LEVELS.length;i++) if(S.eggXp>=XP_LEVELS[i]) lv=i;
+  return lv;
+}
+function eggMax(){ return eggLevel()>=XP_LEVELS.length-1; }
+function xpPct(){
+  const lv=eggLevel();
+  if(eggMax()) return 100;
+  return Math.min(100,((S.eggXp-XP_LEVELS[lv])/(XP_LEVELS[lv+1]-XP_LEVELS[lv]))*100);
+}
+function addXp(n){ S.eggXp+=n; save(); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function recordDay(){
+  const today=todayStr();
+  if(S.lastPracticeDate===today) return;
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const yStr=y.toISOString().slice(0,10);
+  S.streak = S.lastPracticeDate===yStr ? S.streak+1 : 1;
+  S.lastPracticeDate=today;
+  if(!S.checkinDays.includes(today)) S.checkinDays.push(today);
+  save();
+}
 
-      return { bpm, setBpm, isPlaying, setIsPlaying };
-    };
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AUDIO
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let audioCtx=null;
+function getCtx(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
 
-    // ==========================================
-    // 宠物与进化设定字典
-    // ==========================================
-    const LEVEL_THRESHOLDS = [0, 200, 500, 1000, 2000];
+// Metronome
+let metroOn=false, metroIv=null, metroNext=0, metroBeat=0;
+function metroClick(t,accent){
+  const ctx=getCtx(), o=ctx.createOscillator(), g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.frequency.value=accent?1200:800; o.type='sine';
+  g.gain.setValueAtTime(accent?.45:.28,t);
+  g.gain.exponentialRampToValueAtTime(.001,t+.08);
+  o.start(t); o.stop(t+.08);
+}
+function metroTick(){
+  const ctx=getCtx();
+  while(metroNext<ctx.currentTime+.1){
+    metroClick(metroNext,metroBeat%4===0);
+    metroNext+=60/S.settings.bpm; metroBeat++;
+  }
+}
+function startMetro(){
+  const ctx=getCtx(); metroNext=ctx.currentTime+.05; metroBeat=0;
+  metroOn=true; metroIv=setInterval(metroTick,25);
+}
+function stopMetro(){ clearInterval(metroIv); metroOn=false; metroBeat=0; }
+function toggleMetro(){ metroOn?stopMetro():startMetro(); refreshPractice(); }
+function restartMetro(){
+  if(!metroOn) return;
+  clearInterval(metroIv);
+  const ctx=getCtx(); metroNext=ctx.currentTime+.05; metroBeat=0;
+  metroIv=setInterval(metroTick,25);
+}
 
-    const EGG_TYPES = {
-      classical: { id: 'classical', emoji: '🥚', name: '古典音乐蛋', color: 'bg-blue-50', icon: '🎼' },
-      rock: { id: 'rock', emoji: '🥚', name: '摇滚音乐蛋', color: 'bg-red-50', icon: '🎸' },
-      jazz: { id: 'jazz', emoji: '🥚', name: '爵士音乐蛋', color: 'bg-amber-50', icon: '🎷' },
-      electronic: { id: 'electronic', emoji: '🥚', name: '电子音乐蛋', color: 'bg-purple-50', icon: '🎛️' },
-      pop: { id: 'pop', emoji: '🥚', name: '流行音乐蛋', color: 'bg-pink-50', icon: '🎤' },
-      folk: { id: 'folk', emoji: '🥚', name: '民谣音乐蛋', color: 'bg-green-50', icon: '🍃' }
-    };
+function playChime(){
+  try{
+    const ctx=getCtx();
+    [880,1100,1320].forEach((f,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination); o.frequency.value=f; o.type='sine';
+      const t=ctx.currentTime+i*.12;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.3,t+.05);
+      g.gain.exponentialRampToValueAtTime(.001,t+.7); o.start(t); o.stop(t+.7);
+    });
+  }catch(_){}
+}
+function playNoteSound(i){
+  try{
+    const ctx=getCtx(), o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination); o.frequency.value=NOTE_FREQS[i]; o.type='triangle';
+    g.gain.setValueAtTime(.35,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime+.45);
+  }catch(_){}
+}
 
-    const INCUBATION_STAGES = [
-      { level: 1, name: '沉睡的蛋', suffix: '' },
-      { level: 2, name: '颤动的蛋', suffix: ' (微光)' },
-      { level: 3, name: '裂缝的蛋', suffix: ' (破壳前夕)' },
-      { level: 4, name: '发光的蛋', suffix: ' (即将觉醒)' }
-    ];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ROUTER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let currentView = S.name?'home':'setup';
+function navigate(view){
+  if(currentView==='practice') stopPractice();
+  if(currentView==='game'&&gameState==='playing') endGame();
+  currentView=view; render();
+}
 
-    const FINAL_PETS = {
-      classical: [
-        { id: 'c_common1', rarity: 'common', emoji: '🐭', name: '奏鸣鼠', color: 'bg-blue-100', power: 100 },
-        { id: 'c_common2', rarity: 'common', emoji: '🐰', name: '长笛白兔', color: 'bg-blue-200', power: 120 },
-        { id: 'c_rare', rarity: 'rare', emoji: '🦢', name: '天鹅指挥官', color: 'bg-blue-400', power: 300 },
-        { id: 'c_epic', rarity: 'epic', emoji: '🦄', name: '圣音独角兽', color: 'bg-indigo-600', power: 800, text: 'text-white', aura: 'shadow-[0_0_40px_rgba(79,70,229,0.6)] ring-4 ring-indigo-300' }
-      ],
-      rock: [
-        { id: 'r_common1', rarity: 'common', emoji: '🐹', name: '踩镲仓鼠', color: 'bg-red-100', power: 100 },
-        { id: 'r_common2', rarity: 'common', emoji: '🐶', name: '贝斯小狗', color: 'bg-red-200', power: 120 },
-        { id: 'r_rare', rarity: 'rare', emoji: '🐺', name: '孤狼主音', color: 'bg-red-400', power: 300 },
-        { id: 'r_epic', rarity: 'epic', emoji: '🦁', name: '狂怒摇滚狮', color: 'bg-rose-700', power: 800, text: 'text-white', aura: 'shadow-[0_0_40px_rgba(225,29,72,0.6)] ring-4 ring-rose-400' }
-      ],
-      jazz: [
-        { id: 'j_common1', rarity: 'common', emoji: '🐱', name: '慵懒布偶猫', color: 'bg-amber-100', power: 100 },
-        { id: 'j_common2', rarity: 'common', emoji: '🦝', name: '萨克斯浣熊', color: 'bg-amber-200', power: 120 },
-        { id: 'j_rare', rarity: 'rare', emoji: '🦊', name: '魅影赤狐', color: 'bg-amber-400', power: 300 },
-        { id: 'j_epic', rarity: 'epic', emoji: '🐅', name: '幻夜爵士虎', color: 'bg-orange-600', power: 800, text: 'text-white', aura: 'shadow-[0_0_40px_rgba(234,88,12,0.6)] ring-4 ring-orange-300' }
-      ],
-      electronic: [
-        { id: 'e_common1', rarity: 'common', emoji: '🐸', name: '电音小蛙', color: 'bg-purple-100', power: 100 },
-        { id: 'e_common2', rarity: 'common', emoji: '🐧', name: '极客企鹅', color: 'bg-purple-200', power: 120 },
-        { id: 'e_rare', rarity: 'rare', emoji: '🦉', name: '霓虹猫头鹰', color: 'bg-purple-400', power: 300 },
-        { id: 'e_epic', rarity: 'epic', emoji: '🐉', name: '赛博深渊龙', color: 'bg-purple-700', power: 800, text: 'text-white', aura: 'shadow-[0_0_40px_rgba(126,34,206,0.6)] ring-4 ring-purple-400' }
-      ],
-      pop: [
-        { id: 'p_common1', rarity: 'common', emoji: '🐥', name: '叽喳小黄鸟', color: 'bg-pink-100', power: 100 },
-        { id: 'p_common2', rarity: 'common', emoji: '🐷', name: '和声小香猪', color: 'bg-pink-200', power: 120 },
-        { id: 'p_rare', rarity: 'rare', emoji: '🐬', name: '海豚音姬', color: 'bg-pink-400', power: 300 },
-        { id: 'p_epic', rarity: 'epic', emoji: '🦚', name: '璀璨星神凰', color: 'bg-pink-600', power: 800, text: 'text-white', aura: 'shadow-[0_0_40px_rgba(219,39,119,0.6)] ring-4 ring-pink-300' }
-      ],
-      folk: [
-        { id: 'f_common1', rarity: 'common', emoji: '🦔', name: '民谣小刺猬', color: 'bg-green-100', power: 100 },
-        { id: 'f_common2', rarity: 'common', emoji: '🐿️', name: '弹唱松鼠', color: 'bg-green-200', power: 120 },
-        { id: 'f_rare', rarity: 'rare', emoji: '🦌', name: '迷踪林鹿', color: 'bg-green-400', power: 300 },
-        { id: 'f_epic', rarity: 'epic', emoji: '🐻', name: '森之守护熊', color: 'bg-emerald-700', power: 800, text: 'text-white', aura: 'shadow-[0_0_40px_rgba(4,120,87,0.6)] ring-4 ring-emerald-400' }
-      ]
-    };
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PRACTICE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let isPracticing=false, practiceTimer=null, practiceSeconds=0;
+let combo=0, postureTimeout=null, showPosture=false;
 
-    const drawPet = (typeId) => {
-      const roll = Math.random();
-      const pool = FINAL_PETS[typeId];
-      if (roll < 0.1) return pool.find(p => p.rarity === 'epic'); 
-      if (roll < 0.4) return pool.find(p => p.rarity === 'rare'); 
-      const commons = pool.filter(p => p.rarity === 'common');
-      return commons[Math.floor(Math.random() * commons.length)]; 
-    };
+// Partial refresh: only update inner HTML, keep timer ticking
+function refreshPractice(){
+  if(currentView!=='practice') return;
+  const el=document.getElementById('view-content');
+  if(el){ el.innerHTML=buildPractice(); afterPracticeRender(); }
+}
 
-    const getAllPetsList = () => {
-      const list = [];
-      Object.values(FINAL_PETS).forEach(pool => pool.forEach(pet => list.push(pet)));
-      return list;
-    };
+function startPractice(){
+  isPracticing=true; recordDay(); schedulePosture();
+  practiceTimer=setInterval(()=>{
+    practiceSeconds++;
+    // Update only the timer element — no full re-render each second
+    const te=document.getElementById('pt');
+    if(te) te.textContent=fmtTime(practiceSeconds);
+    if(practiceSeconds%300===0){ S.totalMinutes+=5; addXp(5); }
+  },1000);
+  refreshPractice();
+}
+function stopPractice(){
+  if(!isPracticing&&!practiceTimer) return;
+  isPracticing=false; clearInterval(practiceTimer); practiceTimer=null;
+  clearTimeout(postureTimeout); showPosture=false;
+  if(metroOn) stopMetro();
+  save(); refreshPractice();
+}
+function togglePractice(){ isPracticing?stopPractice():startPractice(); }
 
-    const getIncubationState = (typeId, xp) => {
-      const egg = EGG_TYPES[typeId] || EGG_TYPES.classical;
-      let levelIndex = LEVEL_THRESHOLDS.findIndex(t => xp < t);
-      if (levelIndex === -1) levelIndex = LEVEL_THRESHOLDS.length; 
-      const isMaxLevel = levelIndex === LEVEL_THRESHOLDS.length;
-      const stage = INCUBATION_STAGES[Math.min(levelIndex - 1, 3)];
+function schedulePosture(){
+  clearTimeout(postureTimeout);
+  if(!isPracticing) return;
+  postureTimeout=setTimeout(()=>{
+    if(!isPracticing) return;
+    showPosture=true; playChime(); refreshPractice();
+    setTimeout(()=>{
+      showPosture=false; combo++; addXp(combo*3);
+      schedulePosture(); refreshPractice();
+    },3500);
+  }, S.settings.checkInterval*1000);
+}
 
-      return {
-        eggType: egg,
-        level: levelIndex,
-        isMaxLevel,
-        name: isMaxLevel ? '神秘光球' : egg.name + stage.suffix,
-        emoji: isMaxLevel ? '✨' : egg.emoji,
-        color: egg.color,
-        currentXp: xp,
-        nextXp: isMaxLevel ? null : LEVEL_THRESHOLDS[levelIndex],
-        prevXp: LEVEL_THRESHOLDS[levelIndex - 1]
-      };
-    };
+function changeBpm(delta, abs){
+  if(abs!==undefined) S.settings.bpm=abs;
+  else S.settings.bpm=Math.max(40,Math.min(220,S.settings.bpm+delta));
+  save(); restartMetro(); refreshPractice();
+}
 
-    // ==========================================
-    // 动态裂缝渲染组件
-    // ==========================================
-    const EggCrackOverlay = ({ level }) => {
-      if (level <= 1) return null;
-      let opacity = 0;
-      let filter = 'drop-shadow(1px 1px 0px rgba(255,255,255,0.3))';
-      let paths = [];
+function fmtTime(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
 
-      // Lv.2 颤动的蛋：出现基础裂纹
-      if (level >= 2) {
-         opacity = 0.6;
-         paths.push(<path key="1" d="M48,20 L45,35 L55,50 L45,70" fill="none" stroke="#4a3f35" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />);
-      }
-      // Lv.3 裂缝的蛋：侧边深度龟裂
-      if (level >= 3) {
-         opacity = 0.85;
-         paths.push(<path key="2" d="M55,50 L68,60 L62,80" fill="none" stroke="#4a3f35" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />);
-      }
-      // Lv.4 发光的蛋：即将破壳，裂缝透出强烈金光
-      if (level >= 4) {
-         opacity = 1;
-         filter = 'drop-shadow(0 0 8px rgba(251,191,36,0.9))'; 
-         paths.push(<path key="3" d="M45,35 L28,40 L32,55" fill="none" stroke="#4a3f35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />);
-         paths.push(<path key="4" d="M45,70 L35,85" fill="none" stroke="#4a3f35" strokeWidth="2" strokeLinecap="round" />);
-      }
+// Sheet
+let sheetData=null, sheetName='';
+function loadSheet(e){
+  const f=e.target.files[0]; if(!f) return;
+  if(sheetData) URL.revokeObjectURL(sheetData.url);
+  sheetData={url:URL.createObjectURL(f),type:f.type}; sheetName=f.name;
+  refreshPractice();
+}
+function clearSheet(){
+  if(sheetData) URL.revokeObjectURL(sheetData.url);
+  sheetData=null; sheetName=''; refreshPractice();
+}
 
-      return (
-        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none z-10 scale-[0.75]" style={{ opacity, filter, transition: 'all 0.5s ease' }}>
-           {paths}
-        </svg>
-      );
-    };
+// Camera
+let camOn=false, camStream=null;
+function toggleCamera(){
+  if(camOn){
+    camOn=false;
+    if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+    refreshPractice();
+  } else {
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}})
+      .then(s=>{ camOn=true; camStream=s; refreshPractice();
+        setTimeout(()=>{ const v=document.getElementById('cam-video'); if(v) v.srcObject=s; },60); })
+      .catch(()=>alert('无法访问摄像头，请检查浏览器权限。'));
+  }
+}
+function afterPracticeRender(){
+  if(camOn&&camStream){ const v=document.getElementById('cam-video'); if(v) v.srcObject=camStream; }
+}
 
-    function App() {
-      const [user, setUser] = useState(null);
-      const [authError, setAuthError] = useState(null);
-      const [kids, setKids] = useState([]);
-      const [currentView, setCurrentView] = useState('profiles'); 
-      const [activeKidId, setActiveKidId] = useState(null);
+// Hatch
+function doHatch(){
+  if(!eggMax()) return;
+  const pet=drawPet(S.streak);
+  S.eggXp=0; combo=0; S.collectedPets.push({id:pet.id,ts:Date.now()}); save();
+  showHatchModal(pet);
+}
+function showHatchModal(pet){
+  const labels={common:'普通级',rare:'✨ 稀有级',epic:'💫 史诗级',legend:'🌟 传说级！'};
+  const m=document.createElement('div'); m.className='modal-overlay';
+  m.innerHTML=`
+    <div class="anim-popin glass-dark" style="border-radius:28px;padding:34px;text-align:center;max-width:300px;width:100%;">
+      <div style="font-size:76px;margin-bottom:12px;" class="anim-float">${pet.emoji}</div>
+      <span class="rarity-${pet.rarity}" style="font-size:11px;font-weight:700;padding:3px 12px;border-radius:99px;display:inline-block;margin-bottom:12px;">${labels[pet.rarity]||''}</span>
+      <h2 class="fredoka" style="font-size:28px;color:#fff;margin-bottom:10px;">${pet.name}</h2>
+      <div style="background:rgba(255,255,255,.07);border-radius:14px;padding:14px;margin-bottom:18px;">
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-bottom:3px;">战斗力</div>
+        <div class="fredoka" style="font-size:34px;color:${pet.color};">${pet.power}</div>
+      </div>
+      <button class="btn" onclick="this.closest('.modal-overlay').remove();navigate('home');"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;font-size:15px;font-weight:800;border-radius:14px;">
+        太棒了！🏠
+      </button>
+    </div>`;
+  document.body.appendChild(m); playChime();
+}
 
-      useEffect(() => {
-        const initAuth = async () => {
-          try {
-            const initialToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
-            if (initialToken) {
-              await signInWithCustomToken(auth, initialToken);
-            } else {
-              await signInAnonymously(auth);
-            }
-          } catch (err) { 
-            console.error("Auth init failed:", err); 
-            setAuthError(err.message);
-          }
-        };
-        initAuth();
-        const unsubscribe = onAuthStateChanged(auth, setUser);
-        return () => unsubscribe();
-      }, []);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  GAME
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let gameState='idle', gameSong=0;
+let gameScore=0, gameCombo=0, gameMaxCombo=0;
+let gameLiveNotes=[], gameNoteId=0, noteTimer=null, seqIdx=0;
+let _gameKey=null;
 
-      useEffect(() => {
-        if (!user) return;
-        const kidsRef = collection(db, 'artifacts', appId, 'users', user.uid, 'kids');
-        const unsubscribe = onSnapshot(kidsRef, (snapshot) => {
-          const kidsData = [];
-          snapshot.forEach(doc => kidsData.push({ id: doc.id, ...doc.data() }));
-          kidsData.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis() || 0);
-          setKids(kidsData);
-        }, console.error);
-        return () => unsubscribe();
-      }, [user]);
+function startGame(){
+  gameState='playing'; gameScore=0; gameCombo=0; gameMaxCombo=0;
+  gameLiveNotes=[]; gameNoteId=0; seqIdx=0;
+  render(); bindGameKeys(); spawnLoop();
+}
+function endGame(){
+  clearInterval(noteTimer); noteTimer=null; removeGameKeys();
+  const xp=Math.floor(gameScore/10); if(xp>0) addXp(xp);
+  if(gameScore>S.gameHighScore){ S.gameHighScore=gameScore; save(); }
+  gameState='result'; render();
+}
+function selectSong(i){ gameSong=i; render(); }
 
-      const handleAddKid = async (name, eggType) => {
-        if (!user || !name.trim()) return;
-        await setDoc(doc(collection(db, 'artifacts', appId, 'users', user.uid, 'kids')), {
-          name: name.trim(),
-          currentEggType: eggType,
-          currentEggXp: 0,
-          collectedPets: [], 
-          comboCount: 0, 
-          createdAt: serverTimestamp()
-        });
-      };
-
-      const activeKid = kids.find(k => k.id === activeKidId);
-
-      if (authError) {
-        return (
-          <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-            <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-red-100 max-w-md text-center">
-              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <X size={32} />
-              </div>
-              <h2 className="text-2xl font-black text-slate-800 mb-2">云端连接被拒绝</h2>
-              <p className="text-red-500 font-mono text-sm mb-6 bg-red-50 p-3 rounded-lg break-words text-left">{authError}</p>
-              <div className="text-left text-sm text-slate-600 space-y-3 bg-slate-50 p-4 rounded-xl">
-                <p className="font-bold text-slate-800">常见排查指南：</p>
-                <p>1. 如果在 Vercel 运行，请前往 Firebase 控制台 <b>Authentication -> Settings -> Authorized domains</b>，添加你的 Vercel 网址。</p>
-                <p>2. 确认你是否在 Authentication 的 Sign-in method 中启用了 <b>匿名 (Anonymous)</b> 登录。</p>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (!user) return <div className="min-h-screen flex items-center justify-center text-slate-500 font-bold text-xl"><Loader2 className="animate-spin mr-2"/> 连接云端音乐厅...</div>;
-
-      return (
-        <div className="w-full h-full">
-          {currentView === 'profiles' && (
-            <ProfileSelect kids={kids} onAddKid={handleAddKid} onSelectKid={(id) => { setActiveKidId(id); setCurrentView('practice'); }} onGoToPK={() => setCurrentView('pk')} />
-          )}
-          {currentView === 'practice' && activeKid && (
-            <PracticeRoom kid={activeKid} userId={user.uid} onBack={() => setCurrentView('profiles')} onGoToDex={() => setCurrentView('dex')} />
-          )}
-          {currentView === 'dex' && activeKid && (
-            <PetDex kid={activeKid} userId={user.uid} onBack={() => setCurrentView('practice')} />
-          )}
-          {currentView === 'pk' && (
-            <PKArena kids={kids} onBack={() => setCurrentView('profiles')} />
-          )}
-        </div>
-      );
+function spawnLoop(){
+  const song=SONGS[gameSong], iv=song.seq?620:880;
+  noteTimer=setInterval(()=>{
+    if(gameState!=='playing'){ clearInterval(noteTimer); return; }
+    const lane=song.seq?song.seq[seqIdx++%song.seq.length]:Math.floor(Math.random()*7);
+    spawnNote(lane); sweepMissed();
+  },iv);
+}
+function spawnNote(lane){
+  const fz=document.getElementById('fall-zone'); if(!fz) return;
+  const h=fz.clientHeight, id=gameNoteId++;
+  const dur=Math.max(1.3,2.4-gameCombo*.025);
+  const lw=100/7;
+  const el=document.createElement('div');
+  el.id='gn-'+id; el.className='note-block';
+  el.style.cssText=`left:${(lane*lw+lw*.08).toFixed(2)}%;width:${(lw*.84).toFixed(2)}%;height:46px;top:0;--fd:${h+70}px;--fd-dur:${dur}s;background:${NOTE_COLORS[lane]};color:#fff;box-shadow:0 4px 14px ${NOTE_COLORS[lane]}77;`;
+  el.textContent=NOTE_NAMES[lane];
+  fz.appendChild(el);
+  gameLiveNotes.push({id,lane,el,hit:false});
+}
+function sweepMissed(){
+  const fz=document.getElementById('fall-zone'); if(!fz) return;
+  const bottom=fz.getBoundingClientRect().bottom;
+  gameLiveNotes=gameLiveNotes.filter(n=>{
+    if(n.hit) return false;
+    const r=n.el.getBoundingClientRect();
+    if(r.top>bottom+12){
+      n.el.remove(); gameCombo=0;
+      showJudgment('MISS','#6b7280',bottom-100); updateGameHUD(); return false;
     }
-
-    // ==========================================
-    // 1. 角色选择与创建
-    // ==========================================
-    function ProfileSelect({ kids, onAddKid, onSelectKid, onGoToPK }) {
-      const [newKidName, setNewKidName] = useState('');
-      const [selectedEggType, setSelectedEggType] = useState('classical');
-      const [isAdding, setIsAdding] = useState(false);
-
-      const submitAdd = () => {
-        if (newKidName) {
-          onAddKid(newKidName, selectedEggType);
-          setNewKidName('');
-          setIsAdding(false);
-          setSelectedEggType('classical');
-        }
-      };
-
-      if (isAdding) {
-        return (
-          <div className="max-w-6xl mx-auto p-6 md:p-12">
-            <div className="text-center mb-10">
-              <h1 className="text-4xl font-extrabold text-slate-800 mb-4 tracking-tight">🐣 孵化新宠物</h1>
-              <p className="text-slate-500 text-lg">为新成员建立档案，并选择一颗初始盲盒蛋</p>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="w-full md:w-1/3 bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col h-fit">
-                <label className="text-sm font-bold text-slate-500 mb-2 ml-1">小音乐家名字</label>
-                <input 
-                  type="text" 
-                  value={newKidName}
-                  onChange={(e) => setNewKidName(e.target.value)}
-                  placeholder="输入名字"
-                  className="w-full text-lg bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 mb-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-slate-800 text-center"
-                />
-                <div className="flex-1 flex flex-col items-center justify-center mb-8 bg-slate-50 rounded-3xl py-8 transition-colors">
-                  <div className={`w-32 h-32 rounded-full flex items-center justify-center text-6xl mb-4 shadow-inner ${EGG_TYPES[selectedEggType].color}`}>
-                    {EGG_TYPES[selectedEggType].emoji}
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800">{EGG_TYPES[selectedEggType].name}</h3>
-                  <p className="text-sm text-slate-500 mt-1">属性: {EGG_TYPES[selectedEggType].icon}</p>
-                </div>
-                <div className="flex gap-3 w-full">
-                  <button onClick={() => setIsAdding(false)} className="flex-1 py-4 rounded-xl text-slate-500 hover:bg-slate-100 font-medium transition-colors">取消</button>
-                  <button onClick={submitAdd} disabled={!newKidName.trim()} className="flex-1 py-4 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed">确认创建</button>
-                </div>
-              </div>
-
-              <div className="w-full md:w-2/3 bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
-                <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                  <Sparkles className="text-amber-400" /> 选择初始音乐系别
-                </h3>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.keys(EGG_TYPES).map(key => {
-                    const egg = EGG_TYPES[key];
-                    const isSelected = selectedEggType === key;
-                    return (
-                      <button key={key} onClick={() => setSelectedEggType(key)}
-                        className={`flex flex-col items-center justify-center p-6 rounded-3xl transition-all duration-300 border-2 ${
-                          isSelected ? `border-indigo-400 bg-indigo-50/50 scale-[1.02] shadow-md` : 'border-transparent bg-slate-50 hover:bg-slate-100 hover:scale-[1.01]'
-                        }`}
-                      >
-                        <div className={`text-6xl mb-4 transition-transform duration-300 ${isSelected ? 'scale-110 drop-shadow-md' : 'grayscale opacity-70'}`}>{egg.emoji}</div>
-                        <span className={`font-bold text-lg mb-1 ${isSelected ? 'text-indigo-700' : 'text-slate-600'}`}>{egg.name}</span>
-                        <span className={`text-sm px-3 py-1 rounded-full ${isSelected ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-500'}`}>{egg.icon} 系</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      return (
-        <div className="max-w-6xl mx-auto p-6 md:p-12">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 mb-4 tracking-tight pb-2">盲盒音乐宠物</h1>
-            <p className="text-slate-500 text-lg">专注练琴，收集最强传说动物！</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {kids.map(kid => {
-              const state = getIncubationState(kid.currentEggType, kid.currentEggXp || 0);
-              return (
-                <button key={kid.id} onClick={() => onSelectKid(kid.id)}
-                  className="bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-indigo-400 flex flex-col items-center text-center transform hover:-translate-y-2 active:scale-95 group"
-                >
-                  <div className={`${state.color} w-40 h-40 rounded-full flex items-center justify-center text-7xl mb-6 shadow-inner transition-transform group-hover:scale-105 relative ${state.isMaxLevel ? 'animate-pulse ring-4 ring-amber-300' : state.level === 4 ? 'animate-tremble-fast ring-2 ring-amber-200' : state.level === 3 ? 'animate-tremble' : ''}`}>
-                    <span className="relative z-0">{state.emoji}</span>
-                    <EggCrackOverlay level={state.level} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-800 mb-2">{kid.name}</h3>
-                  <p className="text-md font-medium text-indigo-600 mb-3">Lv.{state.level} {state.name}</p>
-                  
-                  {!state.isMaxLevel ? (
-                    <div className="w-full mt-2">
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-1">
-                        <div className="h-full bg-indigo-400 transition-all duration-500" style={{ width: `${((kid.currentEggXp - state.prevXp) / (state.nextXp - state.prevXp)) * 100}%` }}></div>
-                      </div>
-                      <p className="text-xs text-slate-400">{kid.currentEggXp} / {state.nextXp} XP</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm font-bold text-amber-500 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">✨ 满级可孵化！点击进入</p>
-                  )}
-                </button>
-              );
-            })}
-
-            <button onClick={() => setIsAdding(true)} className="bg-slate-50 rounded-[2rem] p-8 border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all flex flex-col items-center justify-center text-slate-500 min-h-[350px] group active:scale-95">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform group-hover:bg-indigo-100">
-                <Plus className="w-10 h-10 text-slate-400 group-hover:text-indigo-500" />
-              </div>
-              <span className="font-bold text-lg">录入新成员</span>
-            </button>
-          </div>
-
-          {kids.length >= 2 && (
-            <div className="flex justify-center">
-              <button onClick={onGoToPK} className="flex items-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-10 py-5 rounded-full font-bold text-xl shadow-xl transition-all transform hover:scale-105 active:scale-95">
-                <Swords className="w-6 h-6" /> 进入宠物竞技场
-              </button>
-            </div>
-          )}
-        </div>
-      );
+    return true;
+  });
+}
+function hitLane(lane){
+  playNoteSound(lane); flashKey(lane);
+  const fz=document.getElementById('fall-zone'); if(!fz) return;
+  const fzR=fz.getBoundingClientRect();
+  const hitTop=fzR.bottom-130, hitBot=fzR.bottom+15;
+  let best=null, bestDist=Infinity;
+  for(const n of gameLiveNotes){
+    if(n.lane!==lane||n.hit) continue;
+    const r=n.el.getBoundingClientRect(), mid=r.top+r.height/2;
+    if(mid>hitTop&&mid<hitBot){
+      const d=Math.abs(mid-(fzR.bottom-70)); if(d<bestDist){bestDist=d;best=n;}
     }
+  }
+  if(best){
+    best.hit=true;
+    best.el.style.animation='notehit .22s ease forwards';
+    setTimeout(()=>best.el.remove(),220);
+    gameCombo++; if(gameCombo>gameMaxCombo) gameMaxCombo=gameCombo;
+    gameScore+=100*Math.min(gameCombo,8);
+    showJudgment(bestDist<22?'PERFECT!':'GREAT', bestDist<22?'#fbbf24':'#34d399', fzR.bottom-120);
+    updateGameHUD();
+  }
+}
+function flashKey(lane){
+  const k=document.getElementById('hk-'+lane); if(!k) return;
+  k.classList.add('pressed'); setTimeout(()=>k.classList.remove('pressed'),140);
+}
+function updateGameHUD(){
+  const sd=document.getElementById('gscore'); if(sd) sd.textContent=gameScore;
+  const cd=document.getElementById('gcombo'); if(cd) cd.textContent=gameCombo>1?gameCombo+'×':'';
+}
+function showJudgment(text,color,top){
+  const el=document.createElement('div'); el.className='judgment-popup';
+  el.style.color=color; el.style.fontSize=(text==='PERFECT!'?'24px':'18px'); el.style.top=(top||200)+'px';
+  el.textContent=text; document.body.appendChild(el); setTimeout(()=>el.remove(),850);
+}
+function bindGameKeys(){
+  _gameKey=e=>{ const i=KEY_LABELS.indexOf(e.key.toUpperCase()); if(i>=0) hitLane(i); };
+  window.addEventListener('keydown',_gameKey);
+}
+function removeGameKeys(){ if(_gameKey){ window.removeEventListener('keydown',_gameKey); _gameKey=null; } }
 
-    // ==========================================
-    // 2. 练琴房间
-    // ==========================================
-    function PracticeRoom({ kid, userId, onBack, onGoToDex }) {
-      const [isPracticing, setIsPracticing] = useState(false);
-      const [sessionTime, setSessionTime] = useState(0);
-      const [showCamera, setShowCamera] = useState(false);
-      const [showPostureCheck, setShowPostureCheck] = useState(false);
-      const [message, setMessage] = useState(`专心看谱，魔法镜已准备就绪。`);
-      const [checkInterval, setCheckInterval] = useState(300); // 改为 300 秒（5分钟）检查一次
-      const [localCombo, setLocalCombo] = useState(kid.comboCount || 0);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  VIEW BUILDERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function buildCracks(lv){
+  let p='';
+  if(lv>=2) p+=`<path d="M50,15 L47,35 L55,50" fill="none" stroke="#2d1b5e" stroke-width="3" stroke-linecap="round"/>`;
+  if(lv>=3) p+=`<path d="M55,50 L65,62 L59,80" fill="none" stroke="#2d1b5e" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M47,35 L32,43 L36,58" fill="none" stroke="#2d1b5e" stroke-width="2" stroke-linecap="round"/>`;
+  if(lv>=4) p+=`<path d="M50,15 L60,7" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M59,80 L54,93" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>`;
+  return `<svg viewBox="0 0 100 100" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;">${p}</svg>`;
+}
 
-      const [showAnalyzer, setShowAnalyzer] = useState(false);
-      const [isAnalyzing, setIsAnalyzing] = useState(false);
-      const [analysisResult, setAnalysisResult] = useState("");
-      const analyzerVideoRef = useRef(null);
-      const analyzerCanvasRef = useRef(null);
+function buildSetup(){
+  return `<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
+    <div style="text-align:center;margin-bottom:40px;">
+      <div style="font-size:88px;margin-bottom:14px;" class="anim-float">🥚</div>
+      <h1 class="fredoka" style="font-size:42px;background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">练琴星球</h1>
+      <p style="color:rgba(255,255,255,.45);font-size:14px;margin-top:6px;">和宠物一起，让练琴变有趣</p>
+    </div>
+    <div class="glass" style="width:100%;max-width:340px;padding:30px;border-radius:24px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em;margin-bottom:8px;">你的名字是？</label>
+      <input id="sn" type="text" placeholder="输入名字" maxlength="12" autocomplete="off"
+        style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:14px 16px;font-size:18px;font-weight:700;color:#fff;outline:none;font-family:inherit;text-align:center;"
+        oninput="this.style.borderColor='#a78bfa'" onkeydown="if(event.key==='Enter')doSetup()">
+      <button class="btn" onclick="doSetup()" style="width:100%;margin-top:16px;padding:15px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff;font-size:16px;font-weight:800;">
+        开始养宠物 🐣
+      </button>
+    </div>
+  </div>`;
+}
+function doSetup(){
+  const v=document.getElementById('sn').value.trim(); if(!v) return;
+  S.name=v; save(); currentView='home'; render();
+}
 
-      const [sheetMusicData, setSheetMusicData] = useState(null);
-      const fileInputRef = useRef(null);
-      const checkTimeoutRef = useRef(null);
+function buildHome(){
+  const lv=eggLevel(), pct=xpPct(), max=eggMax();
+  const anim=EGG_ANIMS[lv]||'anim-float';
+  const last=S.collectedPets.length?petById(S.collectedPets[S.collectedPets.length-1].id):null;
+  const tip=TIPS[new Date().getDate()%TIPS.length];
+  return `<div style="padding:20px 16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <p style="color:rgba(255,255,255,.4);font-size:11px;font-weight:700;">你好，</p>
+        <h2 class="fredoka" style="font-size:28px;">${S.name} 🎵</h2>
+      </div>
+      <div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:6px 14px;display:flex;align-items:center;gap:6px;">
+        <span>🔥</span><span style="font-weight:800;color:#fbbf24;font-size:14px;">${S.streak} 天连续</span>
+      </div>
+    </div>
+    <div class="glass anim-glowpulse" style="border-radius:26px;padding:26px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.13),transparent);pointer-events:none;"></div>
+      <div class="${anim}" style="font-size:88px;line-height:1;margin-bottom:12px;display:inline-block;position:relative;">🥚${lv>=2?buildCracks(lv):''}</div>
+      <div class="fredoka" style="font-size:20px;color:#a78bfa;margin-bottom:2px;">${EGG_STAGES[lv]}</div>
+      <p style="color:rgba(255,255,255,.35);font-size:12px;margin-bottom:14px;">Lv.${lv} · ${S.eggXp} XP</p>
+      <div style="background:rgba(255,255,255,.07);border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
+        <div class="progress-fill" style="width:${pct}%;"></div>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);">${max?'✨ 满级！去练琴房孵化吧':`还需 ${XP_LEVELS[lv+1]-S.eggXp} XP 升级`}</p>
+      ${max?`<button class="btn" onclick="navigate('practice')" style="margin-top:12px;padding:11px 26px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-size:13px;font-weight:800;border-radius:12px;">✨ 去孵化！</button>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div class="glass" style="border-radius:16px;padding:16px;cursor:pointer;" onclick="navigate('practice')">
+        <div style="font-size:28px;margin-bottom:5px;">🎹</div>
+        <div style="font-weight:800;font-size:13px;">开始练琴</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;">获得 XP</div>
+      </div>
+      <div class="glass" style="border-radius:16px;padding:16px;cursor:pointer;" onclick="navigate('game')">
+        <div style="font-size:28px;margin-bottom:5px;">🎮</div>
+        <div style="font-weight:800;font-size:13px;">音符游戏</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;">最高 ${S.gameHighScore} 分</div>
+      </div>
+    </div>
+    ${last?`
+    <div class="glass" style="border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="font-size:40px;flex-shrink:0;">${last.emoji}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:2px;">最新收集</div>
+        <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${last.name}</div>
+        <span class="rarity-${last.rarity}" style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;display:inline-block;margin-top:3px;">${last.rarity.toUpperCase()}</span>
+      </div>
+      <button class="btn" onclick="navigate('dex')" style="padding:7px 12px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:#a78bfa;font-size:11px;border-radius:10px;">图鉴</button>
+    </div>`:
+    `<div class="glass" style="border-radius:16px;padding:14px;text-align:center;margin-bottom:12px;"><p style="color:rgba(255,255,255,.3);font-size:12px;">还没有宠物，快去练琴孵化蛋吧！</p></div>`}
+    <div style="padding:12px 14px;border-radius:14px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.18);">
+      <div style="font-size:10px;font-weight:700;color:#34d399;margin-bottom:3px;">💡 今日建议</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;">${tip}</div>
+    </div>
+  </div>`;
+}
 
-      const { bpm, setBpm, isPlaying: metronomePlaying, setIsPlaying: setMetronomePlaying } = useMetronome();
+function buildPractice(){
+  const lv=eggLevel(), max=eggMax(), pct=xpPct(), anim=EGG_ANIMS[lv]||'anim-float';
+  return `<div style="padding:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h2 class="fredoka" style="font-size:22px;color:#a78bfa;">🎹 练琴房</h2>
+      ${combo>0?`<div style="background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:4px 12px;font-size:12px;font-weight:800;color:#fbbf24;">🔥 ${combo} 连击</div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <div class="glass" style="border-radius:14px;padding:11px;text-align:center;">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;letter-spacing:.04em;margin-bottom:2px;">本次时长</div>
+        <div class="fredoka" style="font-size:22px;" id="pt">${fmtTime(practiceSeconds)}</div>
+      </div>
+      <div class="glass" style="border-radius:14px;padding:11px;text-align:center;">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;letter-spacing:.04em;margin-bottom:2px;">总分钟</div>
+        <div class="fredoka" style="font-size:22px;color:#a78bfa;">${S.totalMinutes}</div>
+      </div>
+      <div class="glass" style="border-radius:14px;padding:11px;text-align:center;">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;letter-spacing:.04em;margin-bottom:2px;">蛋 XP</div>
+        <div class="fredoka" style="font-size:22px;color:#fbbf24;">${S.eggXp}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.3);margin-bottom:3px;">
+        <span>Lv.${lv} ${EGG_STAGES[lv]}</span>
+        <span>${max?'满级':`${S.eggXp}/${XP_LEVELS[lv+1]}`}</span>
+      </div>
+      <div style="height:7px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;">
+        <div class="progress-fill" style="width:${pct}%;"></div>
+      </div>
+    </div>
+    <div class="glass" style="border-radius:16px;padding:11px 14px;margin-bottom:11px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:16px;">🎵</span>
+      <button class="btn" onclick="changeBpm(-5)" style="width:30px;height:30px;background:rgba(255,255,255,.09);color:#fff;font-size:16px;border-radius:8px;flex-shrink:0;">−</button>
+      <div style="flex:1;text-align:center;"><span class="fredoka" style="font-size:20px;">${S.settings.bpm}</span><span style="font-size:9px;color:rgba(255,255,255,.35);margin-left:2px;">BPM</span></div>
+      <button class="btn" onclick="changeBpm(5)" style="width:30px;height:30px;background:rgba(255,255,255,.09);color:#fff;font-size:16px;border-radius:8px;flex-shrink:0;">+</button>
+      <button class="btn" onclick="toggleMetro()" style="padding:7px 11px;font-size:11px;font-weight:700;border-radius:10px;flex-shrink:0;background:${metroOn?'rgba(239,68,68,.2)':'rgba(167,139,250,.2)'};border:1px solid ${metroOn?'rgba(239,68,68,.35)':'rgba(167,139,250,.35)'};color:${metroOn?'#f87171':'#a78bfa'};">
+        ${metroOn?'⏹ 停':'▶ 节拍器'}
+      </button>
+    </div>
+    <div style="margin-bottom:11px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-weight:700;font-size:12px;">📄 曲谱</span>
+        <label style="cursor:pointer;padding:5px 11px;border-radius:9px;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);font-size:10px;font-weight:700;color:#a78bfa;">
+          ${sheetData?'换一份':'+ 导入'}
+          <input type="file" accept="image/*,application/pdf" style="display:none;" onchange="loadSheet(event)">
+        </label>
+      </div>
+      ${sheetData
+        ?`<div style="position:relative;border-radius:13px;overflow:hidden;height:190px;">
+            ${sheetData.type.startsWith('image/')?`<img src="${sheetData.url}" style="width:100%;height:100%;object-fit:contain;background:#fff;">`:`<iframe src="${sheetData.url}" style="width:100%;height:100%;border:none;background:#fff;"></iframe>`}
+            <button class="btn" onclick="clearSheet()" style="position:absolute;top:6px;right:6px;padding:3px 9px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;font-size:10px;">✕</button>
+            <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);border-radius:7px;padding:2px 8px;font-size:9px;font-weight:700;color:#a78bfa;max-width:55%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sheetName}</div>
+          </div>`
+        :`<div style="height:64px;border-radius:13px;background:rgba(255,255,255,.03);border:2px dashed rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:7px;">
+            <span style="font-size:16px;">🎼</span><span style="font-size:11px;color:rgba(255,255,255,.22);">导入曲谱图片或PDF，边看谱边练</span>
+          </div>`}
+    </div>
+    <div class="glass" style="border-radius:18px;padding:18px;text-align:center;margin-bottom:11px;">
+      ${max
+        ?`<div style="font-size:50px;margin-bottom:8px;" class="anim-crack">🥚</div>
+           <p style="font-weight:800;color:#fbbf24;margin-bottom:10px;">✨ 蛋已满级！</p>
+           <button class="btn" onclick="doHatch()" style="width:100%;padding:14px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000;font-size:14px;font-weight:800;border-radius:15px;box-shadow:0 6px 18px rgba(251,191,36,.4);">开盲盒 🎁</button>`
+        :`<div style="font-size:50px;margin-bottom:8px;display:inline-block;position:relative;" class="${anim}">🥚${lv>=2?buildCracks(lv):''}</div>
+           <button class="btn" onclick="togglePractice()"
+             style="width:100%;padding:14px;border-radius:15px;font-size:15px;font-weight:800;
+               background:${isPracticing?'linear-gradient(135deg,#ef4444,#dc2626)':'linear-gradient(135deg,#34d399,#059669)'};
+               color:#fff;box-shadow:${isPracticing?'0 6px 18px rgba(239,68,68,.3)':'0 6px 18px rgba(52,211,153,.3)'};">
+             ${isPracticing?'⏸ 暂停练习':'▶ 专注练琴'}
+           </button>
+           ${isPracticing?`<p style="margin-top:6px;font-size:10px;color:rgba(255,255,255,.28);">每5分钟 +5 XP · 手型检查通过获连击加成</p>`:''}`}
+    </div>
+    <div class="glass" style="border-radius:15px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;">
+        <span style="font-weight:700;font-size:12px;">📷 手型镜</span>
+        <button class="btn" onclick="toggleCamera()" style="padding:5px 11px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:700;color:rgba(255,255,255,.5);border-radius:8px;">${camOn?'关闭':'开启'}</button>
+      </div>
+      ${camOn
+        ?`<div style="height:180px;background:#000;"><video id="cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block;"></video></div>`
+        :`<div style="padding:8px 13px 12px;font-size:11px;color:rgba(255,255,255,.2);text-align:center;">开启后用余光检查手型和坐姿</div>`}
+    </div>
+  </div>
+  ${showPosture?`<div style="position:fixed;inset:0;z-index:90;pointer-events:none;display:flex;align-items:center;justify-content:center;">
+    <div class="anim-popin" style="background:rgba(220,38,38,.92);backdrop-filter:blur(12px);padding:18px 34px;border-radius:99px;text-align:center;border:3px solid rgba(255,255,255,.22);">
+      <div style="font-size:40px;">👀</div>
+      <div style="font-size:19px;font-weight:900;margin-top:2px;">检查手型！</div>
+      <div style="font-size:11px;opacity:.75;margin-top:2px;">手心握苹果，手腕别紧绷</div>
+    </div>
+  </div>`:''}`;
+}
 
-      const videoRef = useRef(null);
-      const streamRef = useRef(null);
-      const state = getIncubationState(kid.currentEggType, kid.currentEggXp || 0);
-
-      const playChime = useCallback(() => {
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
-          gain.gain.setValueAtTime(0.3, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 1.5);
-        } catch(e) {}
-      }, []);
-
-      const triggerPostureCheck = useCallback(() => {
-        setShowPostureCheck(true);
-        setMessage("🛑 突击检查！余光看手型！");
-        playChime();
-
-        if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
-        
-        // 4秒后自动消失并结算奖励（不打断练琴流程）
-        checkTimeoutRef.current = setTimeout(() => {
-          setShowPostureCheck(false);
-          setLocalCombo(prev => {
-            const newCombo = prev + 1;
-            const bonus = Math.min(newCombo * 5, 25);
-            const kidRef = doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id);
-            updateDoc(kidRef, { 
-              currentEggXp: increment(15 + bonus), 
-              comboCount: newCombo 
-            }).catch(console.error);
-            setMessage(`完美保持！连击 ${newCombo} 次！奖励 ${15 + bonus} XP！🔥`);
-            return newCombo;
-          });
-        }, 4000);
-      }, [db, appId, userId, kid.id, playChime]);
-
-      useEffect(() => {
-        let interval;
-        // 仅依靠 isPracticing 判断，即使在展示浮窗时不暂停 sessionTime，确保计时连续
-        if (isPracticing && !state.isMaxLevel) {
-          interval = setInterval(() => {
-            setSessionTime(p => {
-              const newTime = p + 1;
-              if (newTime > 0 && newTime % checkInterval === 0) triggerPostureCheck();
-              return newTime;
-            });
-
-            if (sessionTime > 0 && sessionTime % 5 === 0) {
-               updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id), { currentEggXp: increment(5) }).catch(console.error);
-            }
-          }, 1000);
-        }
-        return () => clearInterval(interval);
-      }, [isPracticing, sessionTime, checkInterval, kid.id, userId, state.isMaxLevel, triggerPostureCheck]);
-
-      useEffect(() => {
-        return () => { 
-          if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop()); 
-          if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
-        };
-      }, []);
-
-      const startMagicMirror = () => {
-        setShowCamera(true);
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-          streamRef.current = s;
-          if (videoRef.current) videoRef.current.srcObject = s;
-        }).catch((e) => {
-          console.error(e);
-          setMessage("摄像头权限被拒绝");
-          setShowCamera(false);
-        });
-      };
-
-      const stopMagicMirror = () => {
-        setShowCamera(false);
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(t => t.stop());
-          streamRef.current = null;
-        }
-      };
-
-      const togglePractice = () => {
-        if (state.isMaxLevel) return setMessage("当前蛋已满级，请先去图鉴孵化它！");
-        setIsPracticing(!isPracticing);
-        if (isPracticing) {
-           setMessage("练习已暂停。");
-           setShowPostureCheck(false);
-           if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
-        } else {
-           setMessage("练习中... 请保持正确的指法！");
-        }
-      };
-
-      const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (sheetMusicData) URL.revokeObjectURL(sheetMusicData.url);
-        const url = URL.createObjectURL(file);
-        setSheetMusicData({ url, type: file.type, name: file.name });
-      };
-
-      useEffect(() => {
-        return () => { if (sheetMusicData) URL.revokeObjectURL(sheetMusicData.url); };
-      }, [sheetMusicData]);
-
-      const openAnalyzer = () => {
-        setShowAnalyzer(true);
-        setAnalysisResult("");
-        if (isPracticing) togglePractice();
-        if (metronomePlaying) setMetronomePlaying(false);
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
-          if (analyzerVideoRef.current) analyzerVideoRef.current.srcObject = s;
-        }).catch(console.error);
-      };
-
-      const closeAnalyzer = () => {
-        setShowAnalyzer(false);
-        if (analyzerVideoRef.current && analyzerVideoRef.current.srcObject) {
-          analyzerVideoRef.current.srcObject.getTracks().forEach(t => t.stop());
-        }
-      };
-
-      const captureAndAnalyze = async () => {
-        if (!analyzerVideoRef.current || !analyzerCanvasRef.current) return;
-        const video = analyzerVideoRef.current;
-        const canvas = analyzerCanvasRef.current;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        const base64Data = dataUrl.split(',')[1];
-        
-        setIsAnalyzing(true);
-        setAnalysisResult("");
-
-        try {
-          const prompt = `你是一个温柔专业的儿童钢琴老师。这可能是一张钢琴谱的照片。
-          请用儿童能听懂的、充满鼓励的语气，帮孩子做“练琴前的乐理预习”：
-          1. 找出谱子上的调号和拍号，简单解释一下。
-          2. 提示2-3个需要特别注意的难点（比如连线、指法跨度、或者临时的升降号）。
-          3. 告诉孩子弹奏这首曲子时应该带着什么情绪。
-          不用太长，分点说明即可。如果照片里没有完整的五线谱，请温和地提醒重新拍摄。`;
-
-          // 核心改动：不再直接请求 Google，而是请求部署在 Vercel 上的中转接口
-          const response = await fetch(`/api/analyze`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                role: "user",
-                parts: [
-                  { text: prompt },
-                  { inlineData: { mimeType: "image/jpeg", data: base64Data } }
-                ]
-              }]
-            })
-          });
-
-          const data = await response.json();
-          if (data.error) throw new Error(data.error.message || data.error);
-          
-          const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text || "分析失败，请稍后再试。";
-          setAnalysisResult(textResult);
-
-        } catch (err) {
-          console.error(err);
-          setAnalysisResult(`糟糕，AI导师刚才走神了：${err.message}。请检查后端环境变量配置。`);
-        } finally {
-          setIsAnalyzing(false);
-        }
-      };
-
-      const formatTime = (sec) => `${Math.floor(sec / 60).toString().padStart(2, '0')}:${(sec % 60).toString().padStart(2, '0')}`;
-      const progressPercentage = state.isMaxLevel ? 100 : Math.min(100, Math.max(0, (((kid.currentEggXp || 0) - state.prevXp) / (state.nextXp - state.prevXp)) * 100));
-
-      return (
-        <div className="p-4 md:p-8 flex flex-col items-center max-w-6xl mx-auto h-screen flex-col">
-          <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*,application/pdf" className="hidden" />
-
-          <div className="w-full flex justify-between items-center mb-4 shrink-0 bg-white p-3 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto">
-            <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-xl font-medium transition-colors shrink-0">
-              <ArrowLeft size={18} /> 返回
-            </button>
-            
-            <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200 shrink-0 mx-2">
-              <Music size={18} className="text-indigo-500 ml-2" />
-              <div className="flex items-center gap-2">
-                <button onClick={() => setBpm(b => Math.max(40, b - 5))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm font-bold text-slate-600 active:scale-95">-</button>
-                <span className="font-mono font-bold w-12 text-center">{bpm}</span>
-                <button onClick={() => setBpm(b => Math.min(240, b + 5))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm font-bold text-slate-600 active:scale-95">+</button>
-              </div>
-              <button onClick={() => setMetronomePlaying(!metronomePlaying)} className={`px-4 py-2 rounded-lg font-bold shadow-sm transition-colors ${metronomePlaying ? 'bg-rose-100 text-rose-600' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
-                {metronomePlaying ? '停' : '节拍器'}
-              </button>
-            </div>
-
-            <div className="flex gap-2 items-center shrink-0">
-              <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2.5 rounded-xl shadow-sm font-bold hover:bg-slate-700 transition-colors active:scale-95">
-                <BookOpen size={18} /> 导入本地谱
-              </button>
-              <button onClick={openAnalyzer} className="flex items-center gap-2 bg-gradient-to-r from-teal-400 to-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-sm font-bold hover:shadow-md transition-all active:scale-95 hidden md:flex">
-                <ScanText size={18} /> AI 识谱
-              </button>
-            </div>
-          </div>
-
-          <div className="w-full flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 min-h-0">
-            <div className="flex flex-col gap-4 min-h-0">
-              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 flex items-center justify-between shrink-0">
-                 <div className="flex-1 mr-4">
-                    <p className="text-slate-500 font-bold mb-1">Lv.{state.level} {state.name}</p>
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                        <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
-                      </div>
-                      <p className="text-xs font-bold text-indigo-600 whitespace-nowrap bg-indigo-50 px-2 py-1 rounded-md">
-                        {state.isMaxLevel ? '满级' : `${kid.currentEggXp}/${state.nextXp}`}
-                      </p>
-                    </div>
-                 </div>
-                 <div className="text-right shrink-0 border-l border-slate-100 pl-4">
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">练习时长</p>
-                    <p className="text-2xl font-mono font-black text-slate-800">{formatTime(sessionTime)}</p>
-                 </div>
-              </div>
-
-              {sheetMusicData ? (
-                <div className="flex-1 bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden relative flex flex-col min-h-0">
-                  <div className="bg-slate-50 border-b border-slate-200 p-3 flex justify-between items-center shrink-0">
-                    <span className="text-sm font-bold text-slate-700 truncate w-3/4 flex items-center gap-2">
-                      <BookOpen size={16} className="text-indigo-500"/> {sheetMusicData.name}
-                    </span>
-                    <button onClick={() => setSheetMusicData(null)} className="text-slate-400 hover:text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-full p-1 transition-colors">
-                      <X size={16} />
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-auto bg-slate-100 flex items-start justify-center relative">
-                    <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2 border border-slate-200 z-10 pointer-events-none">
-                      <span className="text-xl animate-pulse">{state.emoji}</span>
-                      <span className="text-xs font-bold text-slate-600">吸收经验中...</span>
-                    </div>
-
-                    {sheetMusicData.type.startsWith('image/') ? (
-                      <img src={sheetMusicData.url} alt="曲谱" className="w-full object-contain" />
-                    ) : (
-                      <iframe src={sheetMusicData.url} className="w-full h-full border-none" title="曲谱PDF" />
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className={`${state.color} flex-1 rounded-[2rem] p-8 flex flex-col items-center justify-center shadow-inner relative overflow-hidden transition-colors border border-black/5 min-h-0`}>
-                  {localCombo > 0 && (
-                    <div className="absolute top-4 left-4 bg-orange-100 text-orange-600 px-4 py-2 rounded-full font-black text-sm flex items-center gap-2 border border-orange-200 shadow-sm animate-in slide-in-from-top z-10">
-                      <Sparkles size={16} className="animate-spin" /> {localCombo} 连击！
-                    </div>
-                  )}
-
-                  <div className={`text-[160px] filter drop-shadow-2xl relative flex items-center justify-center ${state.isMaxLevel ? 'animate-pulse' : state.level === 4 ? 'animate-tremble-fast' : state.level === 3 ? 'animate-tremble' : 'animate-bounce'}`} style={state.level >= 3 ? {} : { animationDuration: '3s' }}>
-                    <span className="relative z-0">{state.emoji}</span>
-                    <EggCrackOverlay level={state.level} />
-                  </div>
-                  
-                  {state.isMaxLevel ? (
-                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center flex-col p-6 z-20">
-                      <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-sm w-full animate-in zoom-in border border-amber-100">
-                        <p className="text-4xl mb-4">✨</p>
-                        <p className="text-2xl font-black text-amber-600 mb-2">能量已满！</p>
-                        <p className="text-slate-600 mb-8 font-medium">这颗蛋准备好孵化了，去图鉴里开盲盒吧！</p>
-                        <button onClick={onGoToDex} className="bg-gradient-to-r from-amber-400 to-orange-500 text-white w-full py-4 rounded-2xl font-bold text-lg shadow-lg shadow-orange-500/30 active:scale-95 transition-all">
-                          前往孵化室
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="absolute bottom-6 bg-white/60 backdrop-blur-md px-6 py-3 rounded-full text-sm font-bold text-slate-600 shadow-sm border border-white/50 text-center">
-                      点击上方 <strong className="text-slate-800">导入本地谱</strong><br/>
-                      可以一边看谱一边养宠物哦
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-4 min-h-0">
-              <div className="flex-1 bg-slate-900 rounded-[2rem] overflow-hidden shadow-lg relative flex items-center justify-center group min-h-[300px] border-4 border-slate-800">
-                {showCamera ? (
-                  <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform scale-x-[-1]" />
-                ) : (
-                  <div className="text-center p-8">
-                    <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                      <CameraOff className="w-10 h-10 text-slate-500" />
-                    </div>
-                    <h4 className="text-slate-300 font-bold text-xl mb-2">手型魔法镜未开启</h4>
-                    <p className="text-slate-500 text-sm">点击下方开启，练琴时用余光检查手心</p>
-                  </div>
-                )}
-                <button onClick={showCamera ? stopMagicMirror : startMagicMirror} className="absolute bottom-6 right-6 bg-white/20 hover:bg-white/30 backdrop-blur-md px-6 py-3 rounded-full text-white flex items-center gap-2 font-bold transition-colors active:scale-95">
-                  {showCamera ? <><CameraOff size={18}/> 关闭镜像</> : <><Camera size={18}/> 开启镜像</>}
-                </button>
-              </div>
-
-              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 text-center shrink-0">
-                <p className="text-slate-600 mb-5 font-bold h-6">{message}</p>
-                <button
-                  onClick={togglePractice}
-                  disabled={state.isMaxLevel}
-                  className={`w-full flex items-center justify-center gap-3 py-6 rounded-2xl text-2xl font-black text-white transition-all transform active:scale-[0.98] ${
-                    state.isMaxLevel ? 'bg-slate-300 cursor-not-allowed'
-                    : isPracticing ? 'bg-rose-500 shadow-rose-500/30 shadow-xl' 
-                    : 'bg-emerald-500 shadow-emerald-500/30 shadow-xl'
-                  }`}
-                >
-                  {isPracticing ? <><Square className="w-7 h-7 fill-current" /> 暂停练习</> : <><Play className="w-7 h-7 fill-current" /> 专注练琴</>}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {showPostureCheck && (
-            <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50 animate-in fade-in duration-300">
-              <div className="bg-rose-500/90 text-white px-8 md:px-12 py-6 md:py-8 rounded-full shadow-2xl animate-bounce border-4 border-white/30 backdrop-blur-md flex items-center gap-4 text-center transform scale-110">
-                <span className="text-5xl md:text-6xl drop-shadow-lg">👀</span> 
-                <span className="text-3xl md:text-5xl font-black tracking-widest drop-shadow-md">坐直！握苹果！</span>
-              </div>
-            </div>
-          )}
-
-          {showAnalyzer && (
-            <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-8 z-50 overflow-y-auto">
-              <div className="bg-white rounded-[2rem] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-full">
-                <div className="bg-teal-500 p-6 flex justify-between items-center text-white shrink-0">
-                  <div>
-                    <h2 className="text-2xl font-black flex items-center gap-2"><ScanText /> AI 乐理预习导师</h2>
-                    <p className="text-teal-100 text-sm mt-1">在练新曲子前，拍下乐谱，让AI帮你梳理难点。</p>
-                  </div>
-                  <button onClick={closeAnalyzer} className="bg-teal-600 hover:bg-teal-700 p-2 rounded-full transition-colors"><X size={24} /></button>
-                </div>
-                
-                <div className="p-6 flex flex-col md:flex-row gap-6 flex-1 overflow-y-auto">
-                  <div className="flex-1 flex flex-col gap-4">
-                    <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-[4/3] relative shadow-inner">
-                      <video ref={analyzerVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 border-2 border-teal-500/50 m-8 rounded-lg pointer-events-none">
-                         <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-teal-400 rounded-tl-lg"></div>
-                         <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-teal-400 rounded-tr-lg"></div>
-                         <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-teal-400 rounded-bl-lg"></div>
-                         <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-teal-400 rounded-br-lg"></div>
-                      </div>
-                      <canvas ref={analyzerCanvasRef} className="hidden" />
-                    </div>
-                    <button onClick={captureAndAnalyze} disabled={isAnalyzing} className="bg-teal-500 text-white w-full py-4 rounded-xl font-bold text-lg hover:bg-teal-600 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md">
-                      {isAnalyzing ? <><Loader2 className="animate-spin" /> AI正在思考中...</> : <><Camera /> 拍摄并分析</>}
-                    </button>
-                  </div>
-
-                  <div className="flex-1 bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col">
-                    <h3 className="font-black text-slate-800 mb-4 flex items-center gap-2"><Activity className="text-teal-500"/> 分析结果</h3>
-                    <div className="flex-1 overflow-y-auto bg-white p-5 rounded-xl border border-slate-200 shadow-inner text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">
-                      {analysisResult ? analysisResult : (
-                        <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-3">
-                          <ScanText size={48} className="opacity-50" />
-                          <p>请将五线谱置于镜头中心，确保光线充足，然后点击拍照。</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+function buildGameIdle(){
+  return `<div style="padding:20px 16px;">
+    <h2 class="fredoka" style="font-size:22px;color:#f472b6;margin-bottom:4px;">🎮 音符雨</h2>
+    <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:18px;">音符落到底部时，点击对应彩色按键！</p>
+    <div class="glass" style="border-radius:16px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:40px;">🏆</div>
+      <div><div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:700;">历史最高分</div>
+        <div class="fredoka" style="font-size:32px;color:#fbbf24;">${S.gameHighScore}</div></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:7px;">选择曲目</div>
+      ${SONGS.map((s,i)=>`
+        <div onclick="selectSong(${i})" style="padding:11px 13px;border-radius:12px;border:2px solid ${gameSong===i?'rgba(244,114,182,.5)':'rgba(255,255,255,.07)'};background:${gameSong===i?'rgba(244,114,182,.1)':'rgba(255,255,255,.03)'};margin-bottom:5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:${gameSong===i?'#f472b6':'rgba(255,255,255,.6)'};font-size:13px;font-weight:700;">
+          <span>${s.name}</span>${gameSong===i?'<span>✓</span>':''}
+        </div>`).join('')}
+    </div>
+    <div style="padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);margin-bottom:5px;">🎮 玩法</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.43);line-height:1.7;">音符从上方落下，到达底部时点击对应彩色按键。<br>连续命中增加连击倍率！得分结束后转为蛋 XP。<br>电脑键盘：A S D F G H J 对应七个音符键。</div>
+    </div>
+    <button class="btn" onclick="startGame()" style="width:100%;padding:16px;border-radius:16px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;font-size:16px;font-weight:800;box-shadow:0 8px 22px rgba(236,72,153,.35);">
+      开始游戏 🎵
+    </button>
+  </div>`;
+}
+function buildGamePlaying(){
+  return `<div style="height:calc(100vh - 80px);display:flex;flex-direction:column;overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;flex-shrink:0;">
+      <div><div style="font-size:8px;color:rgba(255,255,255,.4);font-weight:700;">SCORE</div>
+        <div class="fredoka" style="font-size:26px;color:#fbbf24;" id="gscore">${gameScore}</div></div>
+      <div style="text-align:center;min-width:56px;">
+        <div class="fredoka" style="font-size:20px;color:#f472b6;" id="gcombo"></div></div>
+      <button class="btn" onclick="endGame()" style="padding:6px 12px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.3);color:#f87171;font-size:11px;border-radius:9px;">结束</button>
+    </div>
+    <div id="fall-zone" style="flex:1;background:linear-gradient(to bottom,rgba(0,0,0,.15),rgba(0,0,0,.35));position:relative;overflow:hidden;">
+      ${NOTE_NAMES.map((_,i)=>`<div style="position:absolute;top:0;bottom:0;left:${(i/7*100).toFixed(1)}%;width:1px;background:rgba(255,255,255,.04);"></div>`).join('')}
+      <div style="position:absolute;bottom:0;left:0;right:0;height:88px;background:linear-gradient(to top,rgba(167,139,250,.1),transparent);border-top:1px solid rgba(167,139,250,.2);pointer-events:none;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:5px;flex-shrink:0;background:rgba(0,0,0,.3);">
+      ${NOTE_NAMES.map((name,i)=>`
+        <button id="hk-${i}" class="hit-key"
+          style="background:rgba(${hexRgb(NOTE_COLORS[i])},.13);border-color:rgba(${hexRgb(NOTE_COLORS[i])},.38);color:rgba(255,255,255,.55);height:52px;"
+          ontouchstart="hitLane(${i})" onmousedown="hitLane(${i})">
+          <span style="font-size:11px;">${name}</span>
+          <span style="font-size:8px;opacity:.45;">${KEY_LABELS[i]}</span>
+        </button>`).join('')}
+    </div>
+  </div>`;
+}
+function buildGameResult(){
+  const hi=gameScore>=S.gameHighScore&&gameScore>0;
+  return `<div style="padding:24px;display:flex;flex-direction:column;align-items:center;min-height:60vh;justify-content:center;">
+    <div class="anim-popin" style="text-align:center;width:100%;max-width:300px;">
+      <div style="font-size:50px;margin-bottom:8px;">${hi?'🎉':'🎵'}</div>
+      <h2 class="fredoka" style="font-size:28px;color:${hi?'#fbbf24':'#a78bfa'};margin-bottom:18px;">${hi?'新记录！':'完成！'}</h2>
+      <div class="glass" style="border-radius:16px;padding:18px;margin-bottom:18px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          ${[['本次得分','#fbbf24',gameScore,'30px'],['最大连击','#f472b6',gameMaxCombo+'×','30px'],['历史最高','rgba(255,255,255,.5)',S.gameHighScore,'24px'],['获得 XP','#a78bfa',Math.floor(gameScore/10),'24px']].map(([l,c,v,fs])=>`
+          <div><div style="font-size:9px;color:rgba(255,255,255,.38);margin-bottom:3px;">${l}</div>
+            <div class="fredoka" style="font-size:${fs};color:${c};">${v}</div></div>`).join('')}
         </div>
-      );
-    }
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn" onclick="startGame()" style="width:100%;padding:13px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;font-size:14px;font-weight:800;border-radius:14px;">再来一局 🎮</button>
+        <button class="btn" id="back-to-idle" style="width:100%;padding:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:12px;border-radius:14px;">返回选歌</button>
+      </div>
+    </div>
+  </div>`;
+}
 
-    // ==========================================
-    // 3. 图鉴与孵化盲盒
-    // ==========================================
-    function PetDex({ kid, userId, onBack }) {
-      const [hatching, setHatching] = useState(false);
-      const [newPetResult, setNewPetResult] = useState(null);
-      
-      const state = getIncubationState(kid.currentEggType, kid.currentEggXp || 0);
-      const collected = kid.collectedPets || []; 
+function buildDex(){
+  const got=S.collectedPets.map(p=>p.id);
+  const sections=[{label:'🌟 传说',key:'legend'},{label:'💫 史诗',key:'epic'},{label:'✨ 稀有',key:'rare'},{label:'🐾 普通',key:'common'}];
+  return `<div style="padding:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;">
+      <h2 class="fredoka" style="font-size:22px;color:#34d399;">📖 宠物图鉴</h2>
+      <span style="font-size:11px;color:rgba(255,255,255,.35);">${[...new Set(got)].length} / ${ALL_PETS.length}</span>
+    </div>
+    ${sections.map(sec=>`
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.42);margin-bottom:7px;">${sec.label}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+        ${PETS_R[sec.key].map(pet=>{
+          const g=got.includes(pet.id), cnt=got.filter(id=>id===pet.id).length;
+          return `<div style="border-radius:13px;padding:10px 6px;text-align:center;position:relative;
+            background:${g?`rgba(${hexRgb(pet.color)},.11)`:'rgba(255,255,255,.04)'};
+            border:1px solid ${g?`rgba(${hexRgb(pet.color)},.22)`:'rgba(255,255,255,.06)'};opacity:${g?1:.38};">
+            <div style="font-size:30px;margin-bottom:3px;${g?'':'filter:grayscale(1);'}">${g?pet.emoji:'❓'}</div>
+            <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,${g?'.72':'.22'});line-height:1.3;">${g?pet.name:'???'}</div>
+            ${g?`<div style="font-size:8px;color:rgba(255,255,255,.28);margin-top:2px;">PWR ${pet.power}</div>`:''}
+            ${cnt>1?`<div style="position:absolute;top:3px;right:3px;background:rgba(251,191,36,.85);color:#000;border-radius:99px;width:14px;height:14px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;">×${cnt}</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('')}
+    <div style="text-align:center;padding:11px;border-radius:11px;background:rgba(255,255,255,.03);font-size:10px;color:rgba(255,255,255,.23);">连续练琴天数越多，获得稀有宠物概率越高 · 当前 ${S.streak} 天</div>
+  </div>`;
+}
 
-      const handleHatch = async () => {
-        if (!state.isMaxLevel || hatching) return;
-        setHatching(true);
-        
-        setTimeout(async () => {
-          const drawnPet = drawPet(kid.currentEggType);
-          setNewPetResult(drawnPet);
-          setHatching(false);
+function buildStats(){
+  const now=new Date(), y=now.getFullYear(), mo=now.getMonth(), td=now.getDate();
+  const fd=new Date(y,mo,1).getDay(), dim=new Date(y,mo+1,0).getDate();
+  let cal=['日','一','二','三','四','五','六'].map(d=>`<div style="text-align:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.22);">${d}</div>`).join('');
+  for(let i=0;i<fd;i++) cal+=`<div class="cal-day cal-empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cal+=`<div class="cal-day ${S.checkinDays.includes(ds)?'cal-done':'cal-empty'} ${d===td?'cal-today':''}">${d}</div>`;
+  }
+  const ms=[
+    ['第一次练琴',S.totalMinutes>0],['练习满30分钟',S.totalMinutes>=30],['练习满100分钟',S.totalMinutes>=100],
+    ['收集第1只宠物',S.collectedPets.length>=1],['收集5只宠物',S.collectedPets.length>=5],
+    ['连续练琴3天',S.streak>=3],['连续练琴7天',S.streak>=7],['游戏得分超500',S.gameHighScore>=500],
+    ['获得稀有宠物',S.collectedPets.some(p=>['rare','epic','legend'].includes(petById(p.id)?.rarity))],
+    ['获得史诗宠物',S.collectedPets.some(p=>['epic','legend'].includes(petById(p.id)?.rarity))],
+  ];
+  return `<div style="padding:16px;">
+    <h2 class="fredoka" style="font-size:22px;color:#60a5fa;margin-bottom:13px;">📊 练琴记录</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px;">
+      ${[['🔥','#fbbf24',S.streak,'连续天数'],['⏱','#60a5fa',S.totalMinutes,'累计分钟'],['🏆','#f472b6',S.gameHighScore,'游戏最高'],['🐾','#34d399',S.collectedPets.length,'收集宠物']].map(([ico,col,val,lab])=>`
+      <div class="glass" style="border-radius:15px;padding:14px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:3px;">${ico}</div>
+        <div class="fredoka" style="font-size:28px;color:${col};">${val}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.33);font-weight:700;">${lab}</div>
+      </div>`).join('')}
+    </div>
+    <div class="glass" style="border-radius:15px;padding:13px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:9px;">📅 本月打卡</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">${cal}</div>
+    </div>
+    <div class="glass" style="border-radius:15px;padding:13px;margin-bottom:13px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:9px;">🎯 成就</div>
+      ${ms.map(([l,d])=>`<div style="display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+        <span style="font-size:13px;">${d?'✅':'⬜'}</span>
+        <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,${d?'.72':'.27'});">${l}</span>
+      </div>`).join('')}
+    </div>
+    <div style="text-align:center;">
+      <button class="btn" id="reset-btn" style="padding:8px 18px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;font-size:11px;border-radius:9px;">重置所有数据</button>
+    </div>
+  </div>`;
+}
 
-          const newCollected = [...collected];
-          const existing = newCollected.find(p => p.id === drawnPet.id);
-          if (existing) existing.count += 1;
-          else newCollected.push({ id: drawnPet.id, count: 1 });
+function buildTabBar(){
+  if(currentView==='setup') return '';
+  const tabs=[{id:'home',icon:'🏠',label:'主页'},{id:'practice',icon:'🎹',label:'练琴'},{id:'game',icon:'🎮',label:'音游'},{id:'dex',icon:'📖',label:'图鉴'},{id:'stats',icon:'📊',label:'记录'}];
+  return `<div class="tab-inner">${tabs.map(t=>`<div class="tab-item ${currentView===t.id?'active':''}" onclick="navigate('${t.id}')"><span class="tab-icon">${t.icon}</span><span class="tab-label">${t.label}</span></div>`).join('')}</div>`;
+}
 
-          await updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id), {
-            collectedPets: newCollected,
-            currentEggXp: 0,
-            comboCount: 0 
-          });
-        }, 2000);
-      };
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  RENDER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function render(){
+  const vc=document.getElementById('view-content');
+  const tb=document.getElementById('tab-bar');
+  if(currentView==='setup'){ vc.innerHTML=buildSetup(); tb.innerHTML=''; return; }
+  const map={home:buildHome, practice:buildPractice, dex:buildDex, stats:buildStats,
+    game:()=>gameState==='playing'?buildGamePlaying():gameState==='result'?buildGameResult():buildGameIdle()};
+  vc.innerHTML=(map[currentView]||buildHome)();
+  tb.innerHTML=buildTabBar();
+  afterRender();
+}
 
-      const selectNewEgg = async (typeId) => {
-        await updateDoc(doc(db, 'artifacts', appId, 'users', userId, 'kids', kid.id), { currentEggType: typeId });
-        setNewPetResult(null); 
-      };
+function afterRender(){
+  if(currentView==='practice') afterPracticeRender();
+  if(currentView==='game'){
+    if(gameState==='playing') bindGameKeys();
+    // "返回选歌" button — safe event binding, not inline onclick for gameState mutation
+    const backBtn=document.getElementById('back-to-idle');
+    if(backBtn) backBtn.addEventListener('click',()=>{ gameState='idle'; render(); });
+    // reset button in stats
+    const resetBtn=document.getElementById('reset-btn');
+    if(resetBtn) resetBtn.addEventListener('click',()=>{ if(confirm('确定要清空所有数据？')) resetAll(); });
+  }
+  if(currentView==='stats'){
+    const resetBtn=document.getElementById('reset-btn');
+    if(resetBtn) resetBtn.addEventListener('click',()=>{ if(confirm('确定要清空所有数据？')) resetAll(); });
+  }
+}
 
-      const allPetsList = getAllPetsList();
-      const collectedIds = collected.map(c => c.id);
+function resetAll(){
+  stopPractice(); if(metroOn) stopMetro();
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; camOn=false; }
+  localStorage.removeItem('piano_pet_v3'); S=defaultState();
+  practiceSeconds=0; combo=0; sheetData=null; sheetName='';
+  gameState='idle'; currentView='setup'; render();
+}
 
-      return (
-        <div className="max-w-6xl mx-auto p-6 md:p-10">
-          <div className="flex justify-between items-center mb-8">
-            <button onClick={onBack} className="flex items-center gap-2 text-slate-600 bg-white px-5 py-3 rounded-full shadow-sm active:scale-95 font-medium border border-slate-100">
-              <ArrowLeft size={20} /> 返回练琴室
-            </button>
-            <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-              <BookOpen className="text-indigo-500" /> 收集图鉴 ({collectedIds.length}/{allPetsList.length})
-            </h2>
-          </div>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  GLOBAL BINDINGS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Object.assign(window,{
+  navigate, doSetup, togglePractice, changeBpm, toggleMetro,
+  toggleCamera, loadSheet, clearSheet, doHatch,
+  selectSong, startGame, endGame, hitLane,
+});
 
-          {state.isMaxLevel && !newPetResult && (
-            <div className="bg-gradient-to-br from-amber-100 to-orange-100 border-4 border-amber-300 rounded-[2rem] p-8 mb-12 text-center shadow-lg relative overflow-hidden">
-              {hatching ? (
-                <div className="py-10">
-                  <div className="text-[120px] animate-bounce filter drop-shadow-xl mb-6">✨</div>
-                  <h3 className="text-3xl font-black text-amber-800 animate-pulse">正在破壳中...</h3>
-                </div>
-              ) : (
-                <div className="py-6">
-                   <h3 className="text-3xl font-black text-amber-800 mb-4">你的 {state.name} 可以孵化了！</h3>
-                   <p className="text-amber-700 mb-8 font-medium">手型连击越高，越容易出极品哦 (当前连击: {kid.comboCount || 0})</p>
-                   <button onClick={handleHatch} className="bg-amber-500 hover:bg-amber-600 text-white px-12 py-5 rounded-full font-black text-2xl shadow-xl active:scale-95 transition-all transform hover:scale-105 border-b-4 border-amber-700">
-                     点击开盲盒！
-                   </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {newPetResult && (
-            <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-6 z-50 overflow-y-auto">
-              <div className={`rounded-[2rem] p-10 max-w-xl w-full text-center shadow-2xl animate-in zoom-in duration-500 ${newPetResult.color} border-4 border-white/50`}>
-                <p className="text-sm font-bold tracking-widest uppercase mb-2 opacity-80 text-slate-800">
-                  {newPetResult.rarity === 'epic' ? '🌟 传说级 🌟' : newPetResult.rarity === 'rare' ? '✨ 稀有级 ✨' : '普通级'}
-                </p>
-                <h2 className={`text-4xl font-black mb-8 ${newPetResult.text || 'text-slate-800'}`}>{newPetResult.name}</h2>
-                
-                <div className={`mx-auto w-48 h-48 rounded-full flex items-center justify-center text-[100px] bg-white/30 shadow-inner mb-8 ${newPetResult.aura || ''}`}>
-                  <div className="animate-bounce" style={{animationDuration: '2s'}}>{newPetResult.emoji}</div>
-                </div>
-
-                <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 mb-8 shadow-sm">
-                   <p className="text-sm text-slate-700 font-bold uppercase tracking-widest">战斗力 (Power)</p>
-                   <p className="text-4xl font-black text-slate-900 font-mono mt-1">{newPetResult.power}</p>
-                </div>
-                
-                <p className="text-slate-800 font-bold mb-4 bg-white/40 inline-block px-4 py-1 rounded-full">选择下一颗要培养的蛋</p>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  {Object.keys(EGG_TYPES).map(key => (
-                    <button key={key} onClick={() => selectNewEgg(key)} className="bg-white hover:bg-slate-50 p-4 rounded-2xl shadow-sm active:scale-95 transition-all flex flex-col items-center gap-2 border border-slate-100 hover:border-indigo-300 w-24">
-                       <span className="text-4xl">{EGG_TYPES[key].emoji}</span>
-                       <span className="text-xs font-bold text-slate-600">{EGG_TYPES[key].icon}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {allPetsList.map(pet => {
-              const colData = collected.find(c => c.id === pet.id);
-              const isCollected = !!colData;
-              return (
-                <div key={pet.id} className={`rounded-3xl p-4 flex flex-col items-center relative overflow-hidden transition-all ${isCollected ? pet.color + ' shadow-sm' : 'bg-slate-200 opacity-50 grayscale'}`}>
-                  <div className="absolute top-2 left-2 right-2 flex justify-between px-1">
-                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${pet.rarity==='epic'?'bg-amber-400 text-white':pet.rarity==='rare'?'bg-blue-400 text-white':'bg-slate-300 text-slate-600'}`}>
-                       {pet.rarity.toUpperCase()}
-                     </span>
-                     {isCollected && colData.count > 1 && (
-                       <span className="text-[10px] font-black bg-white/80 px-2 py-0.5 rounded-full text-slate-700 shadow-sm">x{colData.count}</span>
-                     )}
-                  </div>
-                  <div className="text-5xl mt-8 mb-4 filter drop-shadow-md">
-                    {isCollected ? pet.emoji : '❓'}
-                  </div>
-                  <p className={`text-sm font-bold text-center ${isCollected ? (pet.text || 'text-slate-800') : 'text-slate-500'}`}>
-                    {isCollected ? pet.name : '未知幻兽'}
-                  </p>
-                  {isCollected && <p className="text-[10px] font-mono font-bold mt-2 opacity-70 border-t border-black/10 pt-1 w-full text-center">PWR: {pet.power}</p>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
-
-    // ==========================================
-    // 4. PK 竞技场
-    // ==========================================
-    function PKArena({ kids, onBack }) {
-      const validKids = kids.filter(k => k.collectedPets && k.collectedPets.length > 0);
-      if (validKids.length < 2) {
-         return <div className="min-h-screen flex items-center justify-center"><div className="bg-white p-10 rounded-3xl text-center shadow-lg max-w-md"><Trophy size={48} className="mx-auto text-amber-300 mb-4"/><p className="text-xl font-bold text-slate-700 mb-6">需要至少两个孩子成功孵化过宠物才能开启竞技场哦！</p><button onClick={onBack} className="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold shadow-md hover:bg-indigo-700">返回练琴室</button></div></div>;
-      }
-      
-      const [fighter1, setFighter1] = useState(validKids[0]);
-      const [fighter2, setFighter2] = useState(validKids[1]);
-      const [battleState, setBattleState] = useState('idle');
-      const [winner, setWinner] = useState(null);
-
-      const calculateTotalPower = (kid) => {
-        if (!kid.collectedPets) return 0;
-        return kid.collectedPets.reduce((total, col) => {
-          let petDef = null;
-          Object.values(FINAL_PETS).forEach(pool => { const f = pool.find(p => p.id === col.id); if (f) petDef = f; });
-          return total + (petDef ? petDef.power * col.count : 0);
-        }, 0);
-      };
-
-      const startBattle = () => {
-        if (fighter1.id === fighter2.id) return alert("不能自己打自己！");
-        setBattleState('fighting');
-        setTimeout(() => {
-          const p1 = calculateTotalPower(fighter1);
-          const p2 = calculateTotalPower(fighter2);
-          const score1 = p1 * (1 + (Math.random() * 0.05));
-          const score2 = p2 * (1 + (Math.random() * 0.05));
-          setWinner(score1 > score2 ? fighter1 : score2 > score1 ? fighter2 : null);
-          setBattleState('result');
-        }, 2500);
-      };
-
-      const renderFighterCard = (kid, setKidFunc) => {
-        const power = calculateTotalPower(kid);
-        let bestPet = null;
-        if (kid.collectedPets && kid.collectedPets.length > 0) {
-           const allHisPets = kid.collectedPets.map(c => {
-             let def = null;
-             Object.values(FINAL_PETS).forEach(pool => { const f = pool.find(p=>p.id===c.id); if(f) def=f; });
-             return def;
-           }).filter(Boolean);
-           allHisPets.sort((a,b) => b.power - a.power);
-           bestPet = allHisPets[0];
-        }
-
-        return (
-          <div className="flex-1 bg-white p-8 rounded-[2rem] text-center shadow-lg border border-slate-100">
-             <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-8 font-black text-xl text-slate-800 focus:ring-2 focus:ring-indigo-500 text-center" value={kid.id} onChange={(e) => setKidFunc(validKids.find(k=>k.id===e.target.value))}>
-               {validKids.map(k => <option key={k.id} value={k.id}>{k.name}</option>)}
-             </select>
-             <div className={`mx-auto w-48 h-48 rounded-full flex items-center justify-center text-[80px] shadow-inner mb-6 transition-all duration-500 ${bestPet ? bestPet.color : 'bg-slate-100'} ${bestPet?.aura || ''}`}>
-               {bestPet ? bestPet.emoji : '❓'}
-             </div>
-             <p className="text-sm font-bold text-slate-500 mb-1 uppercase tracking-widest">王牌护驾: {bestPet ? bestPet.name : '无'}</p>
-             <div className="bg-slate-900 text-white rounded-2xl py-4 mt-6 shadow-md border-b-4 border-slate-950">
-               <p className="text-xs font-bold opacity-70 uppercase tracking-widest mb-1">阵容总战力</p>
-               <p className="text-4xl font-black font-mono">{power}</p>
-             </div>
-          </div>
-        );
-      };
-
-      return (
-        <div className="max-w-5xl mx-auto p-6 md:p-12">
-          <button onClick={onBack} className="flex items-center gap-2 text-slate-500 bg-white px-5 py-3 rounded-full shadow-sm mb-8 font-medium border border-slate-100">
-            <ArrowLeft size={20} /> 返回大厅
-          </button>
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-black text-slate-800 tracking-tight flex items-center justify-center gap-4">
-              <Swords className="text-rose-500 w-12 h-12" /> 巅峰战力对决
-            </h1>
-            <p className="text-slate-500 mt-4 text-lg font-medium">看谁收集的传说幻兽更多，谁的音乐能量更强！</p>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-8 items-center justify-center mb-12 relative">
-            {renderFighterCard(fighter1, setFighter1)}
-            <div className="z-10 bg-gradient-to-br from-rose-500 to-red-600 text-white w-24 h-24 rounded-full flex items-center justify-center font-black text-4xl shadow-xl shadow-rose-500/40 transform md:-mx-8 border-4 border-white">
-              VS
-            </div>
-            {renderFighterCard(fighter2, setFighter2)}
-          </div>
-
-          <div className="text-center min-h-[150px]">
-            {battleState === 'idle' && (
-              <button onClick={startBattle} className="bg-slate-900 hover:bg-slate-800 text-white px-16 py-6 rounded-full font-black text-3xl shadow-2xl transition-all transform hover:scale-105 active:scale-95 border-b-4 border-slate-950">
-                👊 开启战斗
-              </button>
-            )}
-            {battleState === 'fighting' && (
-              <div className="flex flex-col items-center">
-                 <Swords className="w-20 h-20 text-rose-500 animate-spin mb-6" />
-                 <div className="text-4xl font-black text-slate-700 animate-pulse tracking-widest">能量对撞中...</div>
-              </div>
-            )}
-            {battleState === 'result' && (
-              <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-                <h3 className="text-6xl font-black text-amber-500 mb-8 drop-shadow-md">
-                  🏆 胜者：{winner?.name || '平局'}
-                </h3>
-                <button onClick={() => setBattleState('idle')} className="text-slate-500 underline font-bold text-xl hover:text-slate-800 transition-colors">再战一局</button>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    const root = createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  BOOT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+render();
+</script>
 </body>
 </html>
