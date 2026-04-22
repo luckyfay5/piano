@@ -6,7 +6,6 @@
 <title>🎹 练琴星球</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
-/* 色系：黄金 #EAB308 × 玫粉 #EC4899 | 背景：#FFFBEB | 文字：#854D0E */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{font-family:"Nunito",sans-serif;background:#FFFBEB;color:#854D0E;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
@@ -14,7 +13,6 @@ body{font-family:"Nunito",sans-serif;background:#FFFBEB;color:#854D0E;overflow-x
 #view-content{flex:1;overflow-y:auto;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 @media(min-width:768px){#app{max-width:540px}}
 .starfield{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 20% 50%,#FEF3C7 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,#FEE2E2 0%,transparent 50%),#FFFBEB}
-.starfield::before{content:"";position:absolute;inset:0;background-image:radial-gradient(30px 30px at 15% 25%,rgba(236,72,153,.05) 0%,transparent 100%),radial-gradient(40px 40px at 80% 10%,rgba(234,179,8,.05) 0%,transparent 100%),radial-gradient(25px 25px at 50% 70%,rgba(236,72,153,.04) 0%,transparent 100%),radial-gradient(50px 50px at 10% 80%,rgba(234,179,8,.06) 0%,transparent 100%),radial-gradient(35px 35px at 90% 60%,rgba(236,72,153,.05) 0%,transparent 100%);filter:blur(8px)}
 .glass{background:rgba(255,255,255,.75);backdrop-filter:blur(12px);border:1px solid rgba(234,179,8,.2);border-radius:20px;box-shadow:0 4px 15px rgba(236,72,153,.05)}
 .glass-dark{background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border:1px solid rgba(236,72,153,.2);border-radius:20px;box-shadow:0 8px 30px rgba(236,72,153,.1)}
 .fredoka{font-family:"Fredoka One",cursive}
@@ -25,17 +23,19 @@ body{font-family:"Nunito",sans-serif;background:#FFFBEB;color:#854D0E;overflow-x
 @keyframes popin{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.1) rotate(4deg)}100%{transform:scale(1) rotate(0);opacity:1}}
 @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
 @keyframes glowpulse{0%,100%{box-shadow:0 0 20px rgba(234,179,8,.15)}50%{box-shadow:0 0 42px rgba(236,72,153,.25)}}
-@keyframes combofly{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-55px);opacity:0}}
+@keyframes combofly{0%{transform:translateY(0) translateX(-50%);opacity:1}100%{transform:translateY(-55px) translateX(-50%);opacity:0}}
 @keyframes notefall{from{transform:translateY(-70px);opacity:0}6%{opacity:1}to{transform:translateY(var(--fd));opacity:1}}
 @keyframes notehit{0%{transform:scale(1);opacity:1}60%{transform:scale(1.4);opacity:.6}100%{transform:scale(.2);opacity:0}}
 @keyframes shadow-pulse{0%,100%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-50%) scale(.8);opacity:.4}}
 @keyframes egg-wiggle-left{0%{transform:rotate(0)}25%{transform:rotate(-18deg) scale(1.08)}50%{transform:rotate(12deg) scale(.96)}75%{transform:rotate(-8deg)}100%{transform:rotate(0)}}
 @keyframes egg-wiggle-right{0%{transform:rotate(0)}25%{transform:rotate(18deg) scale(1.08)}50%{transform:rotate(-12deg) scale(.96)}75%{transform:rotate(8deg)}100%{transform:rotate(0)}}
 @keyframes egg-bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-22px) scale(1.06,.94)}55%{transform:translateY(0) scale(.94,1.06)}75%{transform:translateY(-10px) scale(1.03,.97)}100%{transform:translateY(0) scale(1)}}
-@keyframes egg-shy{0%{transform:translateX(0) rotate(0)}20%{transform:translateX(28px) rotate(10deg)}50%{transform:translateX(20px) rotate(-6deg)}80%{transform:translateX(28px) rotate(8deg)}100%{transform:translateX(0) rotate(0)}}
-@keyframes egg-run-left{0%{transform:translateX(0) rotate(0)}15%{transform:translateX(-38px) rotate(-20deg)}40%{transform:translateX(-26px) rotate(12deg)}65%{transform:translateX(-42px) rotate(-15deg)}100%{transform:translateX(0) rotate(0)}}
-@keyframes egg-run-right{0%{transform:translateX(0) rotate(0)}15%{transform:translateX(38px) rotate(20deg)}40%{transform:translateX(26px) rotate(-12deg)}65%{transform:translateX(42px) rotate(15deg)}100%{transform:translateX(0) rotate(0)}}
 @keyframes egg-spin{0%{transform:rotate(0) scale(1)}40%{transform:rotate(340deg) scale(1.12)}70%{transform:rotate(380deg) scale(.9)}100%{transform:rotate(360deg) scale(1)}}
+@keyframes pulseRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+@keyframes taskComplete{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes xpGain{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-40px);opacity:0}}
 .anim-float{animation:float 3s ease-in-out infinite}
 .anim-wiggle{animation:wiggle .5s ease-in-out infinite}
 .anim-shake{animation:shake .3s ease-in-out infinite}
@@ -72,6 +72,16 @@ body{font-family:"Nunito",sans-serif;background:#FFFBEB;color:#854D0E;overflow-x
 .rarity-rare{background:#FCE7F3;color:#BE185D;border:1px solid #FBCFE8}
 .rarity-epic{background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff}
 .rarity-legend{background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff}
+
+/* ── 新增：任务卡片样式 ── */
+.task-card{border-radius:16px;padding:14px;border:2px solid;transition:all .2s;position:relative;overflow:hidden;}
+.task-card.done{opacity:.6;border-style:dashed;}
+.task-card.active{box-shadow:0 4px 18px rgba(236,72,153,.15);}
+.task-card.locked{opacity:.4;}
+.phase-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.metro-pulse{animation:pulseRing 1s ease-out infinite;}
+.xp-float{position:fixed;pointer-events:none;font-weight:900;font-size:16px;color:#EC4899;z-index:90;animation:xpGain 1s ease forwards;}
+.practice-log-item{padding:10px 0;border-bottom:1px solid rgba(234,179,8,.15);animation:fadeUp .3s ease;}
 input[type=range]{accent-color:#EC4899;cursor:pointer}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -86,6 +96,10 @@ input[type=range]{accent-color:#EC4899;cursor:pointer}
 </div>
 <script>
 'use strict';
+
+// ══════════════════════════════════════════
+// 常量
+// ══════════════════════════════════════════
 const XP_LEVELS=[0,150,400,800,1500];
 const EGG_STAGES=['沉睡中','轻微颤动','出现裂缝','破壳前夕','✨ 满级'];
 const EGG_ANIMS=['anim-float','anim-wiggle','anim-wiggle','anim-shake','anim-crack'];
@@ -102,44 +116,102 @@ const NOTE_FREQS=[261.63,293.66,329.63,349.23,392.00,440.00,493.88];
 const KEY_LABELS=['A','S','D','F','G','H','J'];
 const TIPS=['慢速练习是进步最快的方式，先把每个音弹准确再提速。','新曲子先单手练，左右手都熟了再合并。','练习前先听一遍整首曲子，建立对音乐的整体感受。','遇到困难的地方，单独截出来反复练习，攻克它！','保持手腕放松，不要紧绷——想象手心里握着一个苹果。','每次练完，试试从头到尾完整弹一遍，培养演奏感。','节拍器是你最好的朋友，哪怕很慢也要跟着拍子弹。'];
 const SONGS=[{name:'自由模式（随机无限）',seq:null},{name:'小星星',seq:[0,0,4,4,5,5,4,3,3,2,2,1,1,0,4,4,3,3,2,2,1,4,4,3,3,2,2,1,0,0,4,4,5,5,4,3,3,2,2,1,1,0]},{name:'玛丽有只小羊羔',seq:[2,1,0,1,2,2,2,1,1,1,2,4,4,2,1,0,1,2,2,2,2,1,1,2,1,0]},{name:'生日快乐',seq:[0,0,1,0,3,2,0,0,1,0,4,3,0,0,0,5,3,2,1,6,6,5,3,4,3]}];
-const PETS_R={common:[{id:'c1',emoji:'🐱',name:'音符小猫',color:'#EAB308',power:80},{id:'c2',emoji:'🐰',name:'节拍兔',color:'#EC4899',power:90},{id:'c3',emoji:'🐸',name:'哼歌青蛙',color:'#EAB308',power:85},{id:'c4',emoji:'🐹',name:'练习仓鼠',color:'#EC4899',power:75},{id:'c5',emoji:'🦔',name:'刺猬琴手',color:'#EAB308',power:88}],rare:[{id:'r1',emoji:'🦊',name:'魔法赤狐',color:'#EC4899',power:220},{id:'r2',emoji:'🦋',name:'旋律蝴蝶',color:'#EAB308',power:240},{id:'r3',emoji:'🐬',name:'海豚音姬',color:'#DB2777',power:210},{id:'r4',emoji:'🦉',name:'夜曲猫头鹰',color:'#EAB308',power:250}],epic:[{id:'e1',emoji:'🐉',name:'韵律龙王',color:'#EAB308',power:600},{id:'e2',emoji:'🦄',name:'星光独角兽',color:'#DB2777',power:650},{id:'e3',emoji:'🔥',name:'烈焰凤凰',color:'#E11D48',power:700}],legend:[{id:'l1',emoji:'✨',name:'宇宙乐神',color:'#EC4899',power:1500}]};
+const PETS_R={common:[{id:'c1',emoji:'🐱',name:'音符小猫',color:'#EAB308',power:80,rarity:'common'},{id:'c2',emoji:'🐰',name:'节拍兔',color:'#EC4899',power:90,rarity:'common'},{id:'c3',emoji:'🐸',name:'哼歌青蛙',color:'#EAB308',power:85,rarity:'common'},{id:'c4',emoji:'🐹',name:'练习仓鼠',color:'#EC4899',power:75,rarity:'common'},{id:'c5',emoji:'🦔',name:'刺猬琴手',color:'#EAB308',power:88,rarity:'common'}],rare:[{id:'r1',emoji:'🦊',name:'魔法赤狐',color:'#EC4899',power:220,rarity:'rare'},{id:'r2',emoji:'🦋',name:'旋律蝴蝶',color:'#EAB308',power:240,rarity:'rare'},{id:'r3',emoji:'🐬',name:'海豚音姬',color:'#DB2777',power:210,rarity:'rare'},{id:'r4',emoji:'🦉',name:'夜曲猫头鹰',color:'#EAB308',power:250,rarity:'rare'}],epic:[{id:'e1',emoji:'🐉',name:'韵律龙王',color:'#EAB308',power:600,rarity:'epic'},{id:'e2',emoji:'🦄',name:'星光独角兽',color:'#DB2777',power:650,rarity:'epic'},{id:'e3',emoji:'🔥',name:'烈焰凤凰',color:'#E11D48',power:700,rarity:'epic'}],legend:[{id:'l1',emoji:'✨',name:'宇宙乐神',color:'#EC4899',power:1500,rarity:'legend'}]};
 const ALL_PETS=[...PETS_R.common,...PETS_R.rare,...PETS_R.epic,...PETS_R.legend];
+
+// ── 练习阶段定义 ──
+const PHASES=[
+  {id:'slow',label:'慢速熟悉',icon:'🐢',desc:'用50%速度，弹清楚每个音',minBpm:40,maxBpm:80,xpPerMin:8,color:'#10B981',border:'#6EE7B7'},
+  {id:'normal',label:'正常速度',icon:'🎵',desc:'跟着节拍器，保持稳定节奏',minBpm:60,maxBpm:160,xpPerMin:12,color:'#3B82F6',border:'#93C5FD'},
+  {id:'complete',label:'完整演奏',icon:'🌟',desc:'从头到尾完整弹一遍，不停顿',minBpm:60,maxBpm:220,xpPerMin:20,color:'#EC4899',border:'#F9A8D4'},
+];
+
 function rnd(a){return a[Math.floor(Math.random()*a.length)]}
 function petById(id){return ALL_PETS.find(p=>p.id===id)}
 function drawPet(streak){const r=Math.random()+streak*.01;if(r>1.08)return PETS_R.legend[0];if(r>0.85)return rnd(PETS_R.epic);if(r>0.55)return rnd(PETS_R.rare);return rnd(PETS_R.common)}
 function hexRgb(h){return parseInt(h.slice(1,3),16)+','+parseInt(h.slice(3,5),16)+','+parseInt(h.slice(5,7),16)}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function fmtTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function todayStr(){return new Date().toISOString().slice(0,10)}
 
-// ── Multi-profile state ──
+// ══════════════════════════════════════════
+// 多档案状态
+// ══════════════════════════════════════════
 let AppStore={profiles:[],activeId:null};
 let S=null;
-function createProfile(name){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,eggXp:0,totalMinutes:0,streak:0,lastPracticeDate:'',collectedPets:[],checkinDays:[],gameHighScore:0,settings:{bpm:90,checkInterval:300}}}
+
+function createProfile(name){
+  return{
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    name,
+    eggXp:0,
+    totalMinutes:0,       // 节拍器有效分钟
+    totalRawMinutes:0,    // 总练习分钟（含未开节拍器）
+    streak:0,
+    lastPracticeDate:'',
+    collectedPets:[],
+    checkinDays:[],
+    gameHighScore:0,
+    practiceLogs:[],      // [{date,pieceName,phases:[{id,minutes,bpm}],totalMin,xpEarned}]
+    settings:{bpm:80,checkInterval:300}
+  }
+}
+
 function loadStore(){
-  try{const r=localStorage.getItem('piano_pet_v5');if(r)AppStore=JSON.parse(r);}catch(_){}
+  try{const r=localStorage.getItem('piano_pet_v6');if(r)AppStore=JSON.parse(r);}catch(_){}
   if(AppStore.profiles.length===0){
     try{
-      const raw=localStorage.getItem('piano_pet_v4_multi')||localStorage.getItem('piano_pet_v3');
+      const raw=localStorage.getItem('piano_pet_v5')||localStorage.getItem('piano_pet_v4_multi');
       if(raw){const old=JSON.parse(raw);
-        if(old.profiles){AppStore=old;AppStore.profiles.forEach(p=>{if(!p.settings)p.settings={bpm:90,checkInterval:300};});}
-        else if(old.name){const p=createProfile(old.name);Object.assign(p,old);p.id='legacy';AppStore.profiles=[p];AppStore.activeId='legacy';}
+        if(old.profiles){
+          AppStore.profiles=old.profiles.map(p=>Object.assign(createProfile(p.name||'未命名'),p));
+          AppStore.activeId=old.activeId;
+        } else if(old.name){
+          const p=Object.assign(createProfile(old.name),old);p.id='legacy';
+          AppStore.profiles=[p];AppStore.activeId='legacy';
+        }
       }
     }catch(_){}
   }
   if(AppStore.activeId)S=AppStore.profiles.find(p=>p.id===AppStore.activeId)||null;
 }
 loadStore();
-function save(){try{localStorage.setItem('piano_pet_v5',JSON.stringify(AppStore));}catch(_){}}
+function save(){try{localStorage.setItem('piano_pet_v6',JSON.stringify(AppStore));}catch(_){}}
 function eggLevel(){if(!S)return 0;let lv=0;for(let i=0;i<XP_LEVELS.length;i++)if(S.eggXp>=XP_LEVELS[i])lv=i;return lv}
 function eggMax(){return eggLevel()>=XP_LEVELS.length-1}
 function xpPct(){if(!S)return 0;const lv=eggLevel();if(eggMax())return 100;return Math.min(100,((S.eggXp-XP_LEVELS[lv])/(XP_LEVELS[lv+1]-XP_LEVELS[lv]))*100)}
-function addXp(n){if(S){S.eggXp+=n;save();}}
-function todayStr(){return new Date().toISOString().slice(0,10)}
-function recordDay(){if(!S)return;const today=todayStr();if(S.lastPracticeDate===today)return;const y=new Date();y.setDate(y.getDate()-1);const ys=y.toISOString().slice(0,10);S.streak=S.lastPracticeDate===ys?S.streak+1:1;S.lastPracticeDate=today;if(!S.checkinDays.includes(today))S.checkinDays.push(today);save()}
+function addXp(n,x,y){
+  if(!S)return;
+  S.eggXp+=n;
+  save();
+  // 浮动XP提示
+  if(x!==undefined&&y!==undefined){
+    const el=document.createElement('div');
+    el.className='xp-float';
+    el.textContent='+'+n+' XP';
+    el.style.left=x+'px';el.style.top=y+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1000);
+  }
+}
+function recordDay(){
+  if(!S)return;
+  const today=todayStr();
+  if(S.lastPracticeDate===today)return;
+  const y=new Date();y.setDate(y.getDate()-1);
+  const ys=y.toISOString().slice(0,10);
+  S.streak=S.lastPracticeDate===ys?S.streak+1:1;
+  S.lastPracticeDate=today;
+  if(!S.checkinDays.includes(today))S.checkinDays.push(today);
+  save();
+}
 function getProfilePower(p){if(!p.collectedPets)return 0;return p.collectedPets.reduce((t,c)=>{const pet=petById(c.id);return t+(pet?pet.power*(c.count||1):0)},0)}
 function switchProfile(id){AppStore.activeId=id;S=AppStore.profiles.find(p=>p.id===id);save();navigate('home')}
 function deleteProfile(id){if(!confirm('确定要删除这个档案？所有数据将清空。'))return;AppStore.profiles=AppStore.profiles.filter(p=>p.id!==id);if(AppStore.activeId===id){AppStore.activeId=AppStore.profiles[0]?.id||null;S=AppStore.profiles[0]||null;}save();if(AppStore.profiles.length===0)currentView='setup';render()}
 
-// ── 3D Egg ──
+// ══════════════════════════════════════════
+// 3D 蛋
+// ══════════════════════════════════════════
 function buildEgg(lv,size,animClass){
   const c=EGG_COLORS[Math.min(lv,4)];
   const bg='radial-gradient(circle at 35% 30%,'+c[0]+' 0%,'+c[1]+' 45%,'+c[2]+' 100%)';
@@ -148,76 +220,266 @@ function buildEgg(lv,size,animClass){
   if(lv>=3)cr+='<path d="M52,60 L65,75 L55,95" fill="none" stroke="rgba(133,77,14,.4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M52,61 L65,76 L55,96" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M40,45 L25,55 L28,70" fill="none" stroke="rgba(133,77,14,.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
   if(lv>=4)cr+='<path d="M45,25 L65,10" fill="none" stroke="#EAB308" stroke-width="6" stroke-linecap="round" opacity=".6"/><path d="M45,25 L65,10" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/><path d="M55,95 L45,110" fill="none" stroke="#EAB308" stroke-width="6" stroke-linecap="round" opacity=".6"/><path d="M55,95 L45,110" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>';
   const sa=animClass==='anim-float'?'anim-shadow-pulse':'';
-  return '<div style="display:inline-block;position:relative;cursor:pointer;" onmouseenter="eggInteract(this)" ontouchstart="eggInteract(this)"><div class="'+(animClass||'anim-float')+'" style="position:relative;z-index:2;"><div class="egg-interact-wrapper"><div class="pet-egg" style="--egg-size:'+size+'px;background:'+bg+';--egg-shadow:'+c[3]+';"><svg width="100%" height="100%" viewBox="0 0 100 125" style="position:absolute;inset:0;pointer-events:none;z-index:2;">'+cr+'</svg></div></div></div><div class="egg-shadow '+sa+'"></div></div>';
+  return `<div style="display:inline-block;position:relative;cursor:pointer;" onmouseenter="eggInteract(this)" ontouchstart="eggInteract(this)">
+    <div class="${animClass||'anim-float'}" style="position:relative;z-index:2;">
+      <div class="egg-interact-wrapper">
+        <div class="pet-egg" style="--egg-size:${size}px;background:${bg};--egg-shadow:${c[3]};">
+          <svg width="100%" height="100%" viewBox="0 0 100 125" style="position:absolute;inset:0;pointer-events:none;z-index:2;">${cr}</svg>
+        </div>
+      </div>
+    </div>
+    <div class="egg-shadow ${sa}"></div>
+  </div>`;
 }
 
-// ── Egg interaction ──
-const EGG_REACTIONS=[['egg-wiggle-left',500],['egg-wiggle-right',500],['egg-bounce',600],['egg-shy',800],['egg-run-left',700],['egg-run-right',700],['egg-spin',600]];
+const EGG_REACTIONS=[['egg-wiggle-left',500],['egg-wiggle-right',500],['egg-bounce',600],['egg-spin',600]];
 let eggCD=false;
 function eggInteract(el){
   if(eggCD)return;
   const w=el.querySelector('.egg-interact-wrapper');
   if(!w||w.dataset.playing==='true')return;
   eggCD=true;w.dataset.playing='true';
-  const roll=Math.random();
-  const r=roll<.18?EGG_REACTIONS[4]:roll<.36?EGG_REACTIONS[5]:roll<.52?EGG_REACTIONS[3]:roll<.68?EGG_REACTIONS[2]:roll<.84?EGG_REACTIONS[0]:EGG_REACTIONS[6];
+  const r=rnd(EGG_REACTIONS);
   w.style.animation='none';void w.offsetWidth;
   w.style.animation=r[0]+' '+(r[1]/1000)+'s ease-out forwards';
   setTimeout(()=>{w.dataset.playing='false';w.style.animation='';eggCD=false;},r[1]);
 }
 
-// ── Audio ──
+// ══════════════════════════════════════════
+// 音频
+// ══════════════════════════════════════════
 let audioCtx=null;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
 let metroOn=false,metroIv=null,metroNext=0,metroBeat=0;
 function metroClick(t,ac){const ctx=getCtx(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=ac?1200:800;o.type='sine';g.gain.setValueAtTime(ac?.45:.28,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);o.start(t);o.stop(t+.08)}
-function metroTick(){const ctx=getCtx();while(metroNext<ctx.currentTime+.1){metroClick(metroNext,metroBeat%4===0);metroNext+=60/(S?.settings.bpm||120);metroBeat++;}}
+function metroTick(){const ctx=getCtx();while(metroNext<ctx.currentTime+.1){metroClick(metroNext,metroBeat%4===0);metroNext+=60/(S?.settings.bpm||80);metroBeat++;}}
 function startMetro(){const ctx=getCtx();metroNext=ctx.currentTime+.05;metroBeat=0;metroOn=true;metroIv=setInterval(metroTick,25)}
 function stopMetro(){clearInterval(metroIv);metroOn=false;metroBeat=0}
 function toggleMetro(){metroOn?stopMetro():startMetro();refreshPractice()}
 function restartMetro(){if(!metroOn)return;clearInterval(metroIv);const ctx=getCtx();metroNext=ctx.currentTime+.05;metroBeat=0;metroIv=setInterval(metroTick,25)}
 function playChime(){try{const ctx=getCtx();[880,1100,1320].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';const t=ctx.currentTime+i*.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.7);o.start(t);o.stop(t+.7)});}catch(_){}}
+function playSuccess(){try{const ctx=getCtx();[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';const t=ctx.currentTime+i*.1;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.start(t);o.stop(t+.5)});}catch(_){}}
 function playNoteSound(i){try{const ctx=getCtx(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=NOTE_FREQS[i];o.type='triangle';g.gain.setValueAtTime(.35,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);}catch(_){}}
 
-// ── Router ──
+// ══════════════════════════════════════════
+// 路由
+// ══════════════════════════════════════════
 let currentView=AppStore.profiles.length>0?'profiles':'setup';
 function navigate(view){
-  if(currentView==='practice')stopPractice();
+  if(currentView==='practice')exitPractice();
   if(currentView==='game'&&gameState==='playing')endGame();
   if(currentView==='pk')pkState='idle';
   currentView=view;render();
 }
 
-// ── Practice ──
-let isPracticing=false,practiceTimer=null,practiceSeconds=0;
-let combo=0,postureTimeout=null,showPosture=false;
+// ══════════════════════════════════════════
+// 练习状态（核心重设计）
+// ══════════════════════════════════════════
+let practiceState={
+  running:false,          // 是否在计时（仅节拍器开启时为true）
+  sessionSeconds:0,       // 本次会话总秒数（任何时候）
+  metroSeconds:0,         // 节拍器有效秒数
+  currentPhase:0,         // 当前阶段索引 0/1/2
+  phaseData:[             // 每阶段数据
+    {minutes:0,xp:0,done:false},
+    {minutes:0,xp:0,done:false},
+    {minutes:0,xp:0,done:false},
+  ],
+  pieceName:'',           // 当前练习曲目名
+  sessionStarted:false,   // 是否已经开始（选了曲目）
+  aiTasks:[],             // AI分析生成的任务列表
+  aiTasksDone:[],         // 已完成任务id
+  aiAnalyzed:false,
+};
+let practiceTimer=null;
+let sessionLog=null;      // 当次会话日志，结束时存入
+
+// 曲谱/摄像头
 let sheetData=null,sheetName='';
 let camOn=false,camStream=null,camFacing='user';
-function refreshPractice(){if(currentView!=='practice')return;const el=document.getElementById('view-content');if(el){el.innerHTML=buildPractice();afterPracticeRender();}}
-function startPractice(){isPracticing=true;recordDay();schedulePosture();practiceTimer=setInterval(()=>{practiceSeconds++;const te=document.getElementById('pt');if(te)te.textContent=fmtTime(practiceSeconds);if(practiceSeconds%300===0){S.totalMinutes+=5;addXp(5);}},1000);refreshPractice()}
-function stopPractice(){if(!isPracticing&&!practiceTimer)return;isPracticing=false;clearInterval(practiceTimer);practiceTimer=null;clearTimeout(postureTimeout);showPosture=false;if(metroOn)stopMetro();save();refreshPractice()}
-function togglePractice(){isPracticing?stopPractice():startPractice()}
-function schedulePosture(){clearTimeout(postureTimeout);if(!isPracticing)return;postureTimeout=setTimeout(()=>{if(!isPracticing)return;showPosture=true;playChime();refreshPractice();setTimeout(()=>{showPosture=false;combo++;addXp(combo*3);schedulePosture();refreshPractice();},3500);},(S.settings.checkInterval||300)*1000)}
-function changeBpm(delta){if(!S)return;S.settings.bpm=Math.max(40,Math.min(220,S.settings.bpm+delta));save();restartMetro();refreshPractice()}
-function fmtTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function loadSheet(e){const f=e.target.files[0];if(!f)return;if(sheetData)URL.revokeObjectURL(sheetData.url);sheetData={url:URL.createObjectURL(f),type:f.type};sheetName=f.name;refreshPractice()}
-function clearSheet(){if(sheetData)URL.revokeObjectURL(sheetData.url);sheetData=null;sheetName='';refreshPractice()}
-function toggleCamera(){
-  if(camOn){camOn=false;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}refreshPractice();return;}
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('无法调用摄像头，请确保在 HTTPS 环境下访问，并检查浏览器权限。');return;}
-  startPracticeCamera();
+
+// AI识谱
+let analyzerState='idle',analyzerResult='',analyzerStream=null,analyzerFacing='environment';
+let parsedTasks=[];
+
+function refreshPractice(){
+  if(currentView!=='practice')return;
+  const el=document.getElementById('view-content');
+  if(el){el.innerHTML=buildPractice();afterPracticeRender();}
 }
-function startPracticeCamera(){
-  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFacing}}})
-    .then(s=>{camOn=true;camStream=s;refreshPractice();setTimeout(()=>{const v=document.getElementById('cam-video');if(v){v.srcObject=s;v.style.transform=camFacing==='user'?'scaleX(-1)':'none';}},60);})
-    .catch(err=>alert('无法访问摄像头：'+err.message+'。请在设置中允许浏览器使用摄像头。'));
+
+function startSession(pieceName){
+  practiceState.pieceName=pieceName||'自由练习';
+  practiceState.sessionStarted=true;
+  practiceState.running=false;
+  practiceState.sessionSeconds=0;
+  practiceState.metroSeconds=0;
+  practiceState.currentPhase=0;
+  practiceState.phaseData=[{minutes:0,xp:0,done:false},{minutes:0,xp:0,done:false},{minutes:0,xp:0,done:false}];
+  practiceState.aiTasksDone=[];
+  recordDay();
+  sessionLog={date:todayStr(),pieceName:practiceState.pieceName,phases:[],totalMin:0,xpEarned:0};
+  // 全局计时（含暂停）
+  practiceTimer=setInterval(tickPractice,1000);
+  refreshPractice();
 }
-function switchPracticeCamera(){camFacing=camFacing==='user'?'environment':'user';if(camOn)startPracticeCamera();}
-function afterPracticeRender(){
-  if(camOn&&camStream){const v=document.getElementById('cam-video');if(v){v.srcObject=camStream;v.style.transform=camFacing==='user'?'scaleX(-1)':'none';}}
+
+function tickPractice(){
+  practiceState.sessionSeconds++;
+  // 只有节拍器开启时才计有效时间和XP
+  if(metroOn&&practiceState.running){
+    practiceState.metroSeconds++;
+    const phase=PHASES[practiceState.currentPhase];
+    const pd=practiceState.phaseData[practiceState.currentPhase];
+    // 每60秒给XP
+    if(practiceState.metroSeconds%60===0){
+      pd.minutes++;
+      pd.xp+=phase.xpPerMin;
+      addXp(phase.xpPerMin);
+      if(S){S.totalMinutes++;S.totalRawMinutes++;}
+      save();
+    }
+  } else if(!metroOn&&practiceState.running){
+    // 节拍器关闭但会话在跑：只计原始分钟，不给XP
+    practiceState.sessionSeconds; // already incremented
+    if(practiceState.sessionSeconds%60===0&&S){S.totalRawMinutes++;save();}
+  }
+  // 每5秒刷新一次计时显示
+  if(practiceState.sessionSeconds%5===0)refreshTimerOnly();
 }
-function doHatch(){if(!eggMax()||!S)return;const pet=drawPet(S.streak);S.eggXp=0;combo=0;const ext=S.collectedPets.find(p=>p.id===pet.id);if(ext)ext.count=(ext.count||1)+1;else S.collectedPets.push({id:pet.id,count:1,ts:Date.now()});save();showHatchModal(pet)}
+
+function refreshTimerOnly(){
+  const te=document.getElementById('pt');if(te)te.textContent=fmtTime(practiceState.sessionSeconds);
+  const me=document.getElementById('metro-sec');if(me)me.textContent=fmtTime(practiceState.metroSeconds);
+  // 进度条
+  const phase=PHASES[practiceState.currentPhase];
+  const pd=practiceState.phaseData[practiceState.currentPhase];
+  const targetMin=3; // 每阶段目标3分钟节拍器时间
+  const pct=Math.min(100,(pd.minutes/targetMin)*100);
+  const pb=document.getElementById('phase-progress');if(pb)pb.style.width=pct+'%';
+}
+
+function toggleMetroPractice(){
+  if(!practiceState.sessionStarted)return;
+  practiceState.running=!practiceState.running;
+  if(practiceState.running){
+    startMetro();
+  } else {
+    stopMetro();
+  }
+  refreshPractice();
+}
+
+function completePhase(){
+  const pd=practiceState.phaseData[practiceState.currentPhase];
+  if(pd.done)return;
+  pd.done=true;
+  playSuccess();
+  // 阶段完成奖励
+  const bonus=PHASES[practiceState.currentPhase].xpPerMin*5;
+  addXp(bonus);
+  pd.xp+=bonus;
+  if(practiceState.currentPhase<2){
+    setTimeout(()=>{
+      practiceState.currentPhase++;
+      practiceState.metroSeconds=0; // 重置阶段计时
+      if(metroOn)restartMetro();
+      refreshPractice();
+    },800);
+  } else {
+    // 全部完成
+    finishSession();
+  }
+  refreshPractice();
+}
+
+function changeBpm(delta){
+  if(!S)return;
+  S.settings.bpm=Math.max(40,Math.min(220,S.settings.bpm+delta));
+  save();restartMetro();refreshPractice();
+}
+
+function finishSession(){
+  clearInterval(practiceTimer);practiceTimer=null;
+  if(metroOn)stopMetro();
+  practiceState.running=false;
+  // 保存日志
+  if(S&&sessionLog){
+    const totalXp=practiceState.phaseData.reduce((s,p)=>s+p.xp,0);
+    sessionLog.phases=practiceState.phaseData.map((pd,i)=>({id:PHASES[i].id,minutes:pd.minutes,xp:pd.xp,done:pd.done}));
+    sessionLog.totalMin=Math.floor(practiceState.sessionSeconds/60);
+    sessionLog.xpEarned=totalXp;
+    sessionLog.aiTasks=practiceState.aiTasks.length;
+    sessionLog.aiTasksDone=practiceState.aiTasksDone.length;
+    if(!S.practiceLogs)S.practiceLogs=[];
+    S.practiceLogs.unshift(sessionLog);
+    if(S.practiceLogs.length>50)S.practiceLogs=S.practiceLogs.slice(0,50);
+    save();
+  }
+  showSessionSummary();
+}
+
+function exitPractice(){
+  if(practiceTimer){clearInterval(practiceTimer);practiceTimer=null;}
+  if(metroOn)stopMetro();
+  practiceState.running=false;
+  practiceState.sessionStarted=false;
+  if(camOn){camOn=false;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}}
+  if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
+  analyzerState='idle';
+}
+
+function showSessionSummary(){
+  const totalXp=practiceState.phaseData.reduce((s,p)=>s+p.xp,0);
+  const completedPhases=practiceState.phaseData.filter(p=>p.done).length;
+  const m=document.createElement('div');
+  m.className='modal-overlay';
+  m.innerHTML=`
+    <div class="anim-popin glass-dark" style="border-radius:28px;padding:28px;text-align:center;max-width:310px;width:100%;">
+      <div style="font-size:56px;margin-bottom:8px;">${completedPhases===3?'🎉':completedPhases>=1?'👏':'🎹'}</div>
+      <h2 class="fredoka" style="font-size:26px;color:#854D0E;margin-bottom:6px;">${completedPhases===3?'完美练习！':'练习结束'}</h2>
+      <div style="font-size:12px;color:#B45309;margin-bottom:16px;">${esc(practiceState.pieceName)}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;">
+        ${[['⏱ 总时长',fmtTime(practiceState.sessionSeconds),'#EAB308'],['🎵 节拍时长',fmtTime(practiceState.metroSeconds),'#3B82F6'],['✅ 完成阶段',completedPhases+'/3','#10B981'],['⭐ 获得XP','+'+totalXp,'#EC4899']].map(([l,v,c])=>`
+          <div style="background:rgba(0,0,0,.03);border-radius:12px;padding:11px;">
+            <div style="font-size:10px;color:#B45309;margin-bottom:2px;">${l}</div>
+            <div class="fredoka" style="font-size:22px;color:${c};">${v}</div>
+          </div>`).join('')}
+      </div>
+      ${practiceState.aiTasksDone.length>0?`<div style="padding:10px;background:#FCE7F3;border-radius:12px;margin-bottom:14px;font-size:12px;color:#DB2777;">✨ 完成 ${practiceState.aiTasksDone.length} 个AI任务</div>`:''}
+      <button class="btn" id="summary-close" style="width:100%;padding:14px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:15px;border-radius:14px;">好的！继续加油 🐣</button>
+    </div>`;
+  document.body.appendChild(m);
+  m.querySelector('#summary-close').addEventListener('click',()=>{
+    m.remove();
+    practiceState.sessionStarted=false;
+    practiceState.aiTasks=[];
+    practiceState.aiTasksDone=[];
+    practiceState.aiAnalyzed=false;
+    parsedTasks=[];
+    refreshPractice();
+  });
+  if(completedPhases===3)playChime();
+}
+
+function completeAiTask(taskId){
+  if(practiceState.aiTasksDone.includes(taskId))return;
+  practiceState.aiTasksDone.push(taskId);
+  addXp(15);
+  playSuccess();
+  refreshPractice();
+}
+
+function doHatch(){
+  if(!eggMax()||!S)return;
+  const pet=drawPet(S.streak);
+  S.eggXp=0;
+  const ext=S.collectedPets.find(p=>p.id===pet.id);
+  if(ext)ext.count=(ext.count||1)+1;
+  else S.collectedPets.push({id:pet.id,count:1,ts:Date.now()});
+  save();showHatchModal(pet);
+}
+
 function showHatchModal(pet){
   const labels={common:'普通级',rare:'✨ 稀有级',epic:'💫 史诗级',legend:'🌟 传说级！'};
   const m=document.createElement('div');
@@ -238,7 +500,464 @@ function showHatchModal(pet){
   playChime();
 }
 
-// ── Game ──
+// 曲谱
+function loadSheet(e){const f=e.target.files[0];if(!f)return;if(sheetData)URL.revokeObjectURL(sheetData.url);sheetData={url:URL.createObjectURL(f),type:f.type};sheetName=f.name;refreshPractice()}
+function clearSheet(){if(sheetData)URL.revokeObjectURL(sheetData.url);sheetData=null;sheetName='';refreshPractice()}
+
+// 摄像头（手型镜）
+function toggleCamera(){
+  if(camOn){camOn=false;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}refreshPractice();return;}
+  if(!navigator.mediaDevices?.getUserMedia){alert('无法调用摄像头，请确保在 HTTPS 环境下访问。');return;}
+  startPracticeCamera();
+}
+function startPracticeCamera(){
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFacing}}})
+    .then(s=>{camOn=true;camStream=s;refreshPractice();setTimeout(()=>{const v=document.getElementById('cam-video');if(v){v.srcObject=s;v.style.transform=camFacing==='user'?'scaleX(-1)':'none';}},60);})
+    .catch(err=>alert('无法访问摄像头：'+err.message));
+}
+function switchPracticeCamera(){camFacing=camFacing==='user'?'environment':'user';if(camOn)startPracticeCamera();}
+function afterPracticeRender(){
+  if(camOn&&camStream){const v=document.getElementById('cam-video');if(v){v.srcObject=camStream;v.style.transform=camFacing==='user'?'scaleX(-1)':'none';}}
+  if(analyzerState==='capturing'&&analyzerStream){const v=document.getElementById('analyzer-video');if(v){v.srcObject=analyzerStream;v.style.transform=analyzerFacing==='user'?'scaleX(-1)':'none';}}
+}
+
+// ══════════════════════════════════════════
+// AI 识谱（升级：生成结构化任务）
+// ══════════════════════════════════════════
+function openAnalyzer(){
+  analyzerState='capturing';analyzerResult='';parsedTasks=[];
+  practiceState.aiTasks=[];practiceState.aiTasksDone=[];
+  refreshPractice();
+  if(!navigator.mediaDevices?.getUserMedia){
+    analyzerState='error';analyzerResult='无法调用摄像头，请在 HTTPS 环境下访问。';refreshPractice();return;
+  }
+  startAnalyzerCamera();
+}
+function startAnalyzerCamera(){
+  if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
+  setTimeout(()=>{
+    const v=document.getElementById('analyzer-video');if(!v)return;
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:analyzerFacing}}})
+      .then(s=>{analyzerStream=s;v.srcObject=s;v.style.transform=analyzerFacing==='user'?'scaleX(-1)':'none';})
+      .catch(err=>{analyzerState='error';analyzerResult='摄像头错误：'+err.message;refreshPractice();});
+  },80);
+}
+function switchAnalyzerCamera(){analyzerFacing=analyzerFacing==='environment'?'user':'environment';startAnalyzerCamera();}
+function closeAnalyzer(){
+  if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
+  analyzerState='idle';analyzerResult='';refreshPractice();
+}
+async function captureAndAnalyze(){
+  const v=document.getElementById('analyzer-video'),c=document.getElementById('analyzer-canvas');
+  if(!v||!c)return;
+  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
+  const ctx2d=c.getContext('2d');
+  if(analyzerFacing==='user'){ctx2d.translate(c.width,0);ctx2d.scale(-1,1);}
+  ctx2d.drawImage(v,0,0,c.width,c.height);
+  if(analyzerFacing==='user')ctx2d.setTransform(1,0,0,1,0,0);
+  const b64=c.toDataURL('image/jpeg',.85).split(',')[1];
+  if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
+  analyzerState='analyzing';refreshPractice();
+  try{
+    const resp=await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'qwen-vl-max',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'text',text:`你是一个专业的儿童钢琴老师。请分析这张钢琴乐谱照片，用10岁孩子能懂的语言返回JSON。
+
+要求返回如下JSON格式（不要返回任何其他内容，不要加markdown代码块）：
+{
+  "pieceName": "曲目名称（如果能识别）或'未知曲目'",
+  "summary": "一句话描述这首曲子的风格和情绪（15字内）",
+  "difficulty": "初级/中级/高级",
+  "tasks": [
+    {"id":"t1","icon":"🎯","title":"任务标题（8字内）","desc":"具体要做什么（20字内）","phase":"slow"},
+    {"id":"t2","icon":"👐","title":"任务标题","desc":"具体要做什么","phase":"normal"},
+    {"id":"t3","icon":"⭐","title":"任务标题","desc":"具体要做什么","phase":"complete"}
+  ],
+  "tips": "给孩子的一句鼓励（15字内）"
+}
+
+tasks必须有3个，phase分别对应slow/normal/complete三个练习阶段。
+如果照片里没有清晰的五线谱，请返回：{"error":"请重新拍摄清晰的乐谱照片"}`},
+            {type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}}
+          ]
+        }]
+      })
+    });
+    const rawText=await resp.text();
+    let data;
+    try{data=JSON.parse(rawText);}catch(_){throw new Error('服务器响应格式异常');}
+    if(!resp.ok)throw new Error('API错误 '+resp.status+': '+(data.error?.message||JSON.stringify(data.error)||'未知'));
+    const content=data.choices?.[0]?.message?.content||'';
+    // 解析AI返回的JSON
+    let aiJson;
+    try{
+      // 去除可能的markdown代码块
+      const clean=content.replace(/```json\n?|\n?```/g,'').trim();
+      aiJson=JSON.parse(clean);
+    }catch(_){
+      // 尝试从文本中提取JSON
+      const match=content.match(/\{[\s\S]*\}/);
+      if(match)try{aiJson=JSON.parse(match[0]);}catch(_2){aiJson=null;}
+    }
+    if(aiJson?.error){
+      analyzerResult=aiJson.error;analyzerState='error';refreshPractice();return;
+    }
+    if(aiJson?.tasks){
+      parsedTasks=aiJson.tasks;
+      practiceState.aiTasks=aiJson.tasks;
+      practiceState.aiAnalyzed=true;
+      analyzerResult=JSON.stringify(aiJson);
+      // 如果识别了曲目名，自动填入
+      if(aiJson.pieceName&&aiJson.pieceName!=='未知曲目'&&!practiceState.sessionStarted){
+        practiceState.pendingPieceName=aiJson.pieceName;
+      }
+      analyzerState='done';
+    } else {
+      analyzerResult=content;analyzerState='done_raw';
+    }
+  }catch(e){
+    analyzerResult='出错了：'+e.message;analyzerState='error';
+  }
+  refreshPractice();
+}
+
+function applyAiAndStart(){
+  const name=practiceState.pendingPieceName||practiceState.pieceName||'AI识谱练习';
+  closeAnalyzer();
+  if(!practiceState.sessionStarted)startSession(name);
+  else{practiceState.aiTasks=parsedTasks;practiceState.aiTasksDone=[];}
+  refreshPractice();
+}
+
+function buildAnalyzerOverlay(){
+  if(analyzerState==='idle')return'';
+  const isC=analyzerState==='capturing',isA=analyzerState==='analyzing';
+  const isDone=analyzerState==='done'||analyzerState==='done_raw';
+  const isErr=analyzerState==='error';
+
+  let aiData=null;
+  if(isDone&&analyzerState==='done'){try{aiData=JSON.parse(analyzerResult);}catch(_){}}
+
+  return `<div style="position:fixed;inset:0;z-index:95;background:rgba(255,251,235,.97);display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.06);">
+      <div><div class="fredoka" style="font-size:18px;color:#EC4899;">🎼 AI 识谱助手</div><div style="font-size:11px;color:#B45309;">拍照→生成练习任务</div></div>
+      <div style="display:flex;gap:8px;">
+        ${isC?`<button class="btn" onclick="switchAnalyzerCamera()" style="padding:8px 12px;background:rgba(0,0,0,.04);color:#B45309;font-size:12px;border-radius:10px;border:1px solid rgba(0,0,0,.06);">🔄 翻转</button>`:''}
+        <button class="btn" onclick="closeAnalyzer()" style="padding:8px 14px;background:#FEF3C7;color:#854D0E;font-size:12px;border-radius:10px;">✕</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
+      ${isC?`
+        <div style="position:relative;border-radius:16px;overflow:hidden;background:#FDE68A;aspect-ratio:4/3;flex-shrink:0;">
+          <video id="analyzer-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+          <div style="position:absolute;inset:10%;border:2px solid rgba(236,72,153,.7);border-radius:8px;pointer-events:none;"></div>
+          <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11px;color:#B45309;font-weight:700;">将五线谱置于框内</div>
+        </div>
+        <canvas id="analyzer-canvas" style="display:none;"></canvas>
+        <button class="btn" onclick="captureAndAnalyze()" style="width:100%;padding:15px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:15px;font-weight:800;border-radius:14px;">📸 拍照识谱</button>
+      `:''}
+      ${isA?`
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 0;">
+          <div style="font-size:52px;" class="anim-float">🤔</div>
+          <div style="font-size:15px;font-weight:700;color:#EC4899;">AI 老师正在分析...</div>
+          <div style="font-size:11px;color:#B45309;">正在生成专属练习任务</div>
+        </div>
+      `:''}
+      ${aiData?`
+        <div style="background:#FCE7F3;border:1px solid #FBCFE8;border-radius:16px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <div class="fredoka" style="font-size:20px;color:#854D0E;">${esc(aiData.pieceName||'未知曲目')}</div>
+              <div style="font-size:11px;color:#B45309;margin-top:2px;">${esc(aiData.summary||'')} · ${esc(aiData.difficulty||'')}</div>
+            </div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:#EC4899;margin-bottom:8px;">📋 练习任务</div>
+          ${(aiData.tasks||[]).map(t=>{
+            const ph=PHASES.find(p=>p.id===t.phase)||PHASES[0];
+            return `<div style="display:flex;gap:10px;padding:9px;background:rgba(255,255,255,.7);border-radius:10px;margin-bottom:6px;">
+              <div style="font-size:22px;flex-shrink:0;">${t.icon||'🎯'}</div>
+              <div>
+                <div style="font-weight:800;font-size:12px;color:#854D0E;">${esc(t.title)}</div>
+                <div style="font-size:11px;color:#B45309;margin-top:2px;">${esc(t.desc)}</div>
+                <div style="font-size:9px;margin-top:3px;padding:2px 6px;border-radius:6px;display:inline-block;background:rgba(0,0,0,.05);color:#D97706;">${ph.label}</div>
+              </div>
+            </div>`;
+          }).join('')}
+          ${aiData.tips?`<div style="margin-top:10px;padding:10px;background:#FEF3C7;border-radius:10px;font-size:12px;color:#A16207;">💡 ${esc(aiData.tips)}</div>`:''}
+        </div>
+        <button class="btn" onclick="applyAiAndStart()" style="width:100%;padding:14px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:14px;font-weight:800;border-radius:14px;">✅ 使用这些任务，开始练琴！</button>
+        <button class="btn" onclick="openAnalyzer()" style="width:100%;padding:11px;background:#fff;border:1px solid #FDE68A;color:#B45309;font-size:12px;border-radius:12px;">🔄 重新拍摄</button>
+      `:''}
+      ${(isDone&&analyzerState==='done_raw')?`
+        <div style="background:#FCE7F3;border:1px solid #FBCFE8;border-radius:16px;padding:16px;">
+          <div style="font-size:11px;font-weight:700;color:#EC4899;margin-bottom:8px;">📋 分析结果</div>
+          <div style="font-size:13px;color:#854D0E;line-height:1.8;white-space:pre-wrap;">${esc(analyzerResult)}</div>
+        </div>
+        <button class="btn" onclick="closeAnalyzer()" style="width:100%;padding:12px;background:#FCE7F3;border:1px solid #FBCFE8;color:#DB2777;font-size:13px;border-radius:12px;">✓ 关闭</button>
+      `:''}
+      ${isErr?`
+        <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:14px;padding:16px;">
+          <div style="font-size:13px;color:#EF4444;white-space:pre-wrap;">${esc(analyzerResult)}</div>
+        </div>
+        <button class="btn" onclick="openAnalyzer()" style="width:100%;padding:12px;background:#fff;border:1px solid #FDE68A;color:#B45309;font-size:13px;border-radius:12px;">🔄 重新拍摄</button>
+      `:''}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// 构建练琴房视图（核心重设计）
+// ══════════════════════════════════════════
+function buildPractice(){
+  if(!S)return'';
+
+  // 未开始会话：选曲界面
+  if(!practiceState.sessionStarted){
+    return buildPracticeStart();
+  }
+  // 已开始会话：练习界面
+  return buildPracticeSession();
+}
+
+function buildPracticeStart(){
+  const lv=eggLevel(),max=eggMax(),anim=EGG_ANIMS[lv];
+  return `<div style="padding:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 class="fredoka" style="font-size:22px;color:#EAB308;">🎹 练琴房</h2>
+    </div>
+    <!-- 蛋状态 -->
+    <div class="glass anim-glowpulse" style="border-radius:22px;padding:18px;text-align:center;margin-bottom:14px;">
+      <div style="margin-bottom:8px;">${buildEgg(lv,72,anim)}</div>
+      <div class="fredoka" style="font-size:16px;color:#EAB308;">${EGG_STAGES[lv]}</div>
+      <div style="height:6px;background:rgba(0,0,0,.05);border-radius:99px;overflow:hidden;margin:8px 0 4px;">
+        <div class="progress-fill" style="width:${xpPct()}%;"></div>
+      </div>
+      <div style="font-size:10px;color:#A8A29E;">${max?'✨ 满级！可以孵化了':'还需 '+(XP_LEVELS[eggLevel()+1]-S.eggXp)+' XP'}</div>
+      ${max?`<button class="btn" onclick="doHatch()" style="margin-top:10px;padding:10px 22px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:13px;border-radius:12px;">✨ 立即孵化</button>`:''}
+    </div>
+
+    <!-- XP规则说明 -->
+    <div style="background:#E0F2FE;border:1px solid #BAE6FD;border-radius:14px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;color:#0284C7;margin-bottom:6px;">📊 XP 获取规则</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${PHASES.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+          <span style="color:#854D0E;">${p.icon} ${p.label}</span>
+          <span style="font-weight:800;color:${p.color};">+${p.xpPerMin} XP/分钟（节拍器开启时）</span>
+        </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+          <span style="color:#854D0E;">✅ 完成每个阶段</span>
+          <span style="font-weight:800;color:#EC4899;">+阶段奖励 XP</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+          <span style="color:#854D0E;">🎼 AI任务完成</span>
+          <span style="font-weight:800;color:#8B5CF6;">+15 XP / 个</span>
+        </div>
+      </div>
+      <div style="margin-top:7px;font-size:10px;color:#0369A1;border-top:1px solid #BAE6FD;padding-top:6px;">⚠️ 关闭节拍器时不计入有效练习时间，也不获得 XP</div>
+    </div>
+
+    <!-- 曲目输入 -->
+    <div class="glass" style="border-radius:16px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:8px;">🎵 今天练什么？</div>
+      <input id="piece-name-input" type="text" placeholder="输入曲目名，或用AI识谱自动填入"
+        value="${esc(practiceState.pendingPieceName||practiceState.pieceName||'')}"
+        style="width:100%;background:#fff;border:1px solid #FDE68A;border-radius:11px;padding:11px 13px;font-size:14px;font-weight:700;color:#854D0E;outline:none;font-family:inherit;"
+        oninput="practiceState.pendingPieceName=this.value">
+    </div>
+
+    <!-- 曲谱导入 -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-weight:700;font-size:12px;color:#854D0E;">📄 曲谱</span>
+        <label style="cursor:pointer;padding:5px 11px;border-radius:9px;background:#FEF3C7;border:1px solid #FDE68A;font-size:10px;font-weight:700;color:#D97706;">
+          ${sheetData?'换一份':'+ 导入图片/PDF'}
+          <input type="file" accept="image/*,application/pdf" style="display:none;" onchange="loadSheet(event)">
+        </label>
+      </div>
+      ${sheetData?`
+        <div style="position:relative;border-radius:13px;overflow:hidden;height:160px;">
+          ${sheetData.type.startsWith('image/')?`<img src="${sheetData.url}" style="width:100%;height:100%;object-fit:contain;background:#fff;">`:`<iframe src="${sheetData.url}" style="width:100%;height:100%;border:none;background:#fff;"></iframe>`}
+          <button class="btn" onclick="clearSheet()" style="position:absolute;top:6px;right:6px;padding:3px 9px;background:rgba(133,77,14,.6);color:#fff;border-radius:8px;font-size:10px;">✕</button>
+        </div>`:`
+        <div style="height:50px;border-radius:13px;background:rgba(0,0,0,.03);border:2px dashed rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;gap:7px;">
+          <span style="font-size:14px;">🎼</span><span style="font-size:11px;color:#B45309;">导入后练习时可随时查看</span>
+        </div>`}
+    </div>
+
+    <!-- 操作按钮 -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn" onclick="openAnalyzer()" style="width:100%;padding:13px;background:linear-gradient(135deg,#8B5CF6,#EC4899);color:#fff;font-size:13px;font-weight:800;border-radius:14px;">
+        🎼 AI 识谱 · 生成专属练习任务
+      </button>
+      <button class="btn" onclick="doStartSession()" style="width:100%;padding:14px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:15px;font-weight:800;border-radius:14px;box-shadow:0 6px 18px rgba(236,72,153,.3);">
+        ▶ 开始练琴
+      </button>
+    </div>
+  </div>
+  ${buildAnalyzerOverlay()}`;
+}
+
+function doStartSession(){
+  const inp=document.getElementById('piece-name-input');
+  const name=(inp?inp.value.trim():'')||practiceState.pendingPieceName||'自由练习';
+  practiceState.pendingPieceName='';
+  startSession(name);
+}
+
+function buildPracticeSession(){
+  const lv=eggLevel(),max=eggMax();
+  const phase=PHASES[practiceState.currentPhase];
+  const pd=practiceState.phaseData[practiceState.currentPhase];
+  const targetMin=3;
+  const phasePct=Math.min(100,(pd.minutes/targetMin)*100);
+  const totalXp=practiceState.phaseData.reduce((s,p)=>s+p.xp,0);
+
+  return `<div style="padding:16px;">
+    <!-- 顶部：曲目 + 结束 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div>
+        <div style="font-size:10px;color:#B45309;font-weight:700;">正在练习</div>
+        <div class="fredoka" style="font-size:18px;color:#854D0E;">${esc(practiceState.pieceName)}</div>
+      </div>
+      <button class="btn" onclick="finishSession()" style="padding:7px 14px;background:#FEE2E2;border:1px solid #FCA5A5;color:#EF4444;font-size:12px;border-radius:10px;">结束练习</button>
+    </div>
+
+    <!-- 计时器 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="glass" style="border-radius:13px;padding:10px;text-align:center;">
+        <div style="font-size:8px;color:#B45309;font-weight:700;margin-bottom:1px;">会话时长</div>
+        <div class="fredoka" style="font-size:18px;color:#854D0E;" id="pt">${fmtTime(practiceState.sessionSeconds)}</div>
+      </div>
+      <div style="border-radius:13px;padding:10px;text-align:center;background:${metroOn?'rgba(59,130,246,.12)':'rgba(0,0,0,.04)'};border:1px solid ${metroOn?'#93C5FD':'transparent'};">
+        <div style="font-size:8px;color:${metroOn?'#1D4ED8':'#B45309'};font-weight:700;margin-bottom:1px;">节拍有效</div>
+        <div class="fredoka" style="font-size:18px;color:${metroOn?'#3B82F6':'#A8A29E'};" id="metro-sec">${fmtTime(practiceState.metroSeconds)}</div>
+      </div>
+      <div class="glass" style="border-radius:13px;padding:10px;text-align:center;">
+        <div style="font-size:8px;color:#B45309;font-weight:700;margin-bottom:1px;">本次XP</div>
+        <div class="fredoka" style="font-size:18px;color:#EC4899;">${totalXp}</div>
+      </div>
+    </div>
+
+    <!-- 节拍器 -->
+    <div class="glass" style="border-radius:16px;padding:12px 14px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="position:relative;flex-shrink:0;">
+          <button class="btn" onclick="toggleMetroPractice()" style="width:44px;height:44px;border-radius:12px;font-size:20px;
+            background:${metroOn?'linear-gradient(135deg,#3B82F6,#1D4ED8)':'linear-gradient(135deg,#EAB308,#F59E0B)'};color:#fff;
+            box-shadow:${metroOn?'0 4px 14px rgba(59,130,246,.4)':'0 4px 14px rgba(234,179,8,.3)'};">
+            ${metroOn?'⏸':'▶'}
+          </button>
+          ${metroOn?`<div style="position:absolute;inset:-4px;border-radius:16px;border:2px solid #3B82F6;animation:pulseRing 1s ease-out infinite;pointer-events:none;"></div>`:''}
+        </div>
+        <button class="btn" onclick="changeBpm(-5)" style="width:30px;height:30px;background:#fff;border:1px solid #FDE68A;color:#854D0E;font-size:16px;border-radius:8px;">−</button>
+        <div style="flex:1;text-align:center;">
+          <span class="fredoka" style="font-size:22px;color:#854D0E;">${S.settings.bpm}</span>
+          <span style="font-size:9px;color:#D97706;margin-left:2px;">BPM</span>
+        </div>
+        <button class="btn" onclick="changeBpm(5)" style="width:30px;height:30px;background:#fff;border:1px solid #FDE68A;color:#854D0E;font-size:16px;border-radius:8px;">+</button>
+        <div style="font-size:10px;color:${metroOn?'#3B82F6':'#D97706'};font-weight:700;flex-shrink:0;">
+          ${metroOn?'✅ 计XP':'⚠️ 不计XP'}
+        </div>
+      </div>
+    </div>
+
+    <!-- 三阶段进度 -->
+    <div class="glass" style="border-radius:18px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:10px;">🎯 练习阶段</div>
+      ${PHASES.map((ph,i)=>{
+        const phd=practiceState.phaseData[i];
+        const isActive=i===practiceState.currentPhase;
+        const isLocked=i>practiceState.currentPhase&&!phd.done;
+        const isDone=phd.done;
+        const phPct=Math.min(100,(phd.minutes/targetMin)*100);
+        return `<div class="task-card ${isDone?'done':isActive?'active':isLocked?'locked':''}"
+          style="background:${isDone?'rgba(16,185,129,.06)':isActive?'rgba(255,255,255,.9)':'rgba(0,0,0,.02)'};border-color:${isDone?ph.border:isActive?ph.border:'rgba(0,0,0,.08)'};margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:${isActive?'10px':'0'};">
+            <div class="phase-dot" style="background:${isDone?ph.color:isActive?ph.color:'#D6D3D1'};"></div>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:800;color:${isDone?ph.color:isActive?'#854D0E':'#A8A29E'};">
+                ${ph.icon} ${ph.label} ${isDone?'✅':''}
+              </div>
+              <div style="font-size:10px;color:#B45309;margin-top:1px;">${ph.desc}</div>
+            </div>
+            <div style="font-size:10px;font-weight:700;color:${ph.color};">${ph.xpPerMin}XP/分</div>
+          </div>
+          ${isActive?`
+            <div style="height:5px;background:rgba(0,0,0,.06);border-radius:99px;overflow:hidden;margin-bottom:8px;">
+              <div id="phase-progress" style="width:${phasePct}%;height:100%;background:${ph.color};border-radius:99px;transition:width .5s;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:10px;color:#B45309;">${phd.minutes}/${targetMin} 分钟</span>
+              <button class="btn" onclick="completePhase()" style="padding:6px 14px;background:${ph.color};color:#fff;font-size:11px;font-weight:800;border-radius:9px;">
+                ${isDone?'已完成':'✓ 完成此阶段'}
+              </button>
+            </div>
+          `:`<div style="font-size:10px;color:#B45309;">${isDone?'已用时 '+phd.minutes+' 分钟，获得 '+phd.xp+' XP':isLocked?'请先完成上一阶段':''}</div>`}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- AI 任务 -->
+    ${practiceState.aiTasks.length>0?`
+    <div class="glass" style="border-radius:18px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:#8B5CF6;">🎼 AI 专属任务</div>
+        <div style="font-size:10px;color:#B45309;">${practiceState.aiTasksDone.length}/${practiceState.aiTasks.length} 完成 · 每个+15XP</div>
+      </div>
+      ${practiceState.aiTasks.map(t=>{
+        const done=practiceState.aiTasksDone.includes(t.id);
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;margin-bottom:6px;
+          background:${done?'rgba(139,92,246,.06)':'rgba(255,255,255,.8)'};border:1px solid ${done?'#C4B5FD':'rgba(0,0,0,.06)'};">
+          <div style="font-size:24px;flex-shrink:0;opacity:${done?.5:1};">${t.icon||'🎯'}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:800;color:${done?'#8B5CF6':'#854D0E'};${done?'text-decoration:line-through;':''}">${esc(t.title)}</div>
+            <div style="font-size:10px;color:#B45309;margin-top:1px;">${esc(t.desc)}</div>
+          </div>
+          ${done?`<div style="font-size:16px;">✅</div>`:
+          `<button class="btn" onclick="completeAiTask('${t.id}')" style="padding:6px 10px;background:linear-gradient(135deg,#8B5CF6,#EC4899);color:#fff;font-size:10px;border-radius:8px;flex-shrink:0;">完成</button>`}
+        </div>`;
+      }).join('')}
+    </div>`:
+    `<button class="btn" onclick="openAnalyzer()" style="width:100%;padding:11px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);color:#7C3AED;font-size:12px;font-weight:800;border-radius:14px;margin-bottom:12px;">
+      🎼 AI 识谱 · 生成专属任务（+XP奖励）
+    </button>`}
+
+    <!-- 曲谱展示 -->
+    ${sheetData?`
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:6px;">📄 曲谱</div>
+      <div style="position:relative;border-radius:13px;overflow:hidden;height:160px;">
+        ${sheetData.type.startsWith('image/')?`<img src="${sheetData.url}" style="width:100%;height:100%;object-fit:contain;background:#fff;">`:`<iframe src="${sheetData.url}" style="width:100%;height:100%;border:none;background:#fff;"></iframe>`}
+      </div>
+    </div>`:''}
+
+    <!-- 手型镜 -->
+    <div class="glass" style="border-radius:15px;overflow:hidden;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;">
+        <span style="font-weight:700;font-size:12px;color:#854D0E;">📷 手型镜</span>
+        <div style="display:flex;gap:6px;">
+          ${camOn?`<button class="btn" onclick="switchPracticeCamera()" style="padding:5px 9px;background:rgba(0,0,0,.04);border:1px solid #FDE68A;font-size:10px;font-weight:700;color:#D97706;border-radius:8px;">🔄 翻转</button>`:''}
+          <button class="btn" onclick="toggleCamera()" style="padding:5px 11px;background:#fff;border:1px solid #FDE68A;font-size:10px;font-weight:700;color:#D97706;border-radius:8px;">${camOn?'关闭':'开启'}</button>
+        </div>
+      </div>
+      ${camOn?`<div style="height:160px;background:#FDE68A;"><video id="cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video></div>`:
+      `<div style="padding:6px 13px 10px;font-size:11px;color:#B45309;text-align:center;">开启后用余光检查手型和坐姿</div>`}
+    </div>
+  </div>
+  ${buildAnalyzerOverlay()}`;
+}
+
+// ══════════════════════════════════════════
+// 游戏
+// ══════════════════════════════════════════
 let gameState='idle',gameSong=0,gameScore=0,gameCombo=0,gameMaxCombo=0;
 let gameLiveNotes=[],gameNoteId=0,noteTimer=null,seqIdx=0,_gameKey=null;
 function startGame(){gameState='playing';gameScore=0;gameCombo=0;gameMaxCombo=0;gameLiveNotes=[];gameNoteId=0;seqIdx=0;render();bindGameKeys();spawnLoop()}
@@ -254,107 +973,15 @@ function showJudgment(text,color,top){const el=document.createElement('div');el.
 function bindGameKeys(){_gameKey=e=>{const i=KEY_LABELS.indexOf(e.key.toUpperCase());if(i>=0)hitLane(i)};window.addEventListener('keydown',_gameKey)}
 function removeGameKeys(){if(_gameKey){window.removeEventListener('keydown',_gameKey);_gameKey=null}}
 
-// ── PK ──
+// ══════════════════════════════════════════
+// PK
+// ══════════════════════════════════════════
 let pkFighter1=null,pkFighter2=null,pkState='idle',pkWinner=null;
 function startPK(){if(!pkFighter1||!pkFighter2||pkFighter1.id===pkFighter2.id){alert('请选择两个不同的成员！');return;}pkState='fighting';render();setTimeout(()=>{const p1=getProfilePower(pkFighter1),p2=getProfilePower(pkFighter2);const s1=p1*(1+Math.random()*.1),s2=p2*(1+Math.random()*.1);pkWinner=s1>s2?pkFighter1:s2>s1?pkFighter2:null;pkState='result';render();},2000)}
 
-// ── AI Analyzer (Netlify) ──
-let analyzerState='idle',analyzerResult='',analyzerStream=null,analyzerFacing='environment';
-function openAnalyzer(){
-  analyzerState='capturing';analyzerResult='';refreshPractice();
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    analyzerState='error';analyzerResult='无法调用摄像头，请确保在 HTTPS 环境下访问并检查浏览器权限。';refreshPractice();return;
-  }
-  startAnalyzerCamera();
-}
-function startAnalyzerCamera(){
-  if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
-  setTimeout(()=>{
-    const v=document.getElementById('analyzer-video');if(!v)return;
-    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:analyzerFacing}}})
-      .then(s=>{analyzerStream=s;v.srcObject=s;v.style.transform=analyzerFacing==='user'?'scaleX(-1)':'none';})
-      .catch(err=>{analyzerState='error';analyzerResult='无法访问摄像头：'+err.message+'。请在设置中允许浏览器使用摄像头。';refreshPractice();});
-  },80);
-}
-function switchAnalyzerCamera(){analyzerFacing=analyzerFacing==='environment'?'user':'environment';startAnalyzerCamera();}
-function closeAnalyzer(){if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}analyzerState='idle';analyzerResult='';refreshPractice()}
-async function captureAndAnalyze(){
-  const v=document.getElementById('analyzer-video'),c=document.getElementById('analyzer-canvas');
-  if(!v||!c)return;
-  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
-  const ctx2d=c.getContext('2d');
-  // 前置镜头CSS做了镜像，发给AI前在canvas上翻转回正向
-  if(analyzerFacing==='user'){ctx2d.translate(c.width,0);ctx2d.scale(-1,1);}
-  ctx2d.drawImage(v,0,0,c.width,c.height);
-  if(analyzerFacing==='user'){ctx2d.setTransform(1,0,0,1,0,0);}
-  const b64=c.toDataURL('image/jpeg',.85).split(',')[1];
-  if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
-  analyzerState='analyzing';refreshPractice();
-  try{
-    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model: "qwen-vl-max", // 使用通义千问视觉大模型
-        messages: [{
-          role: "user",
-          content: [
-            { type: "text", text: "你是一个耐心温柔的儿童钢琴老师。请分析这张钢琴乐谱的照片，用10岁孩子能懂的语言，分点说明：\n1. 调号和拍号是什么，用通俗的话解释\n2. 这首曲子的情绪和弹奏感觉\n3. 有哪2-3个需要特别注意的难点（比如跨手、连线、快速音群）\n4. 给孩子一句鼓励的话\n如果照片里没有清晰的五线谱，请温和地说明并请孩子重新拍摄。回答请简洁，不超过150字。" },
-            { type: "image_url", image_url: { url: `data:image/jpeg;base64,${b64}` } }
-          ]
-        }]
-      })
-    }).catch(err=>{throw new Error('网络连接失败或后端接口不可达：'+err.message);});
-    const rawText=await resp.text();
-    let data;
-    try{data=JSON.parse(rawText);}
-    catch(_){throw new Error('服务器响应格式异常 (HTTP '+resp.status+')：\n'+rawText.substring(0,150)+'...');}
-    if(!resp.ok){
-      const errMsg=data.error&&typeof data.error==='object'?data.error.message||JSON.stringify(data.error):data.error;
-      throw new Error('API 请求失败 (HTTP '+resp.status+')：'+(errMsg||'未知错误'));
-    }
-    analyzerResult=data.choices?.[0]?.message?.content||'分析失败，API 返回数据中没有文本内容。';
-    analyzerState='done';
-  }catch(e){
-    analyzerResult='出错了：\n'+e.message+'\n\n💡 排查建议：\n1. 请检查 Cloudflare 的环境变量 DASHSCOPE_API_KEY 是否填错或过期。\n2. 确保已重新触发部署。';
-    analyzerState='error';
-  }
-  refreshPractice();
-}
-function buildAnalyzerOverlay(){
-  if(analyzerState==='idle')return'';
-  const isC=analyzerState==='capturing',isA=analyzerState==='analyzing',isD=analyzerState==='done'||analyzerState==='error';
-  return `<div style="position:fixed;inset:0;z-index:95;background:rgba(255,251,235,.97);display:flex;flex-direction:column;">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.06);">
-      <div><div class="fredoka" style="font-size:18px;color:#EC4899;">🎼 AI 识谱助手</div><div style="font-size:11px;color:#B45309;">由 通义千问 驱动</div></div>
-      <div style="display:flex;gap:8px;">
-        ${isC?`<button class="btn" onclick="switchAnalyzerCamera()" style="padding:8px 12px;background:rgba(0,0,0,.04);color:#B45309;font-size:12px;border-radius:10px;border:1px solid rgba(0,0,0,.06);">🔄 翻转</button>`:''}
-        <button class="btn" onclick="closeAnalyzer()" style="padding:8px 14px;background:#FEF3C7;color:#854D0E;font-size:12px;border-radius:10px;">✕ 关闭</button>
-      </div>
-    </div>
-    <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;">
-      ${isC?`<div style="position:relative;border-radius:16px;overflow:hidden;background:#FDE68A;aspect-ratio:4/3;flex-shrink:0;">
-        <video id="analyzer-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
-        <div style="position:absolute;inset:12%;border:2px solid rgba(236,72,153,.6);border-radius:8px;pointer-events:none;"></div>
-        <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;color:#B45309;">将五线谱置于框内，光线充足效果更好</div>
-      </div><canvas id="analyzer-canvas" style="display:none;"></canvas>
-      <button class="btn" onclick="captureAndAnalyze()" style="width:100%;padding:15px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:15px;font-weight:800;border-radius:14px;">📸 拍照并分析</button>`:''}
-      ${isA?`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 0;">
-        <div style="font-size:48px;" class="anim-float">🤔</div>
-        <div style="font-size:15px;font-weight:700;color:#EC4899;">AI 老师正在分析中...</div>
-        <div style="font-size:12px;color:#B45309;">请稍候几秒</div>
-      </div>`:''}
-      ${isD?`<div style="background:#FCE7F3;border:1px solid #FBCFE8;border-radius:16px;padding:18px;">
-        <div style="font-size:11px;font-weight:700;color:#EC4899;margin-bottom:10px;">📋 分析结果</div>
-        <div style="font-size:13px;color:#854D0E;line-height:1.8;white-space:pre-wrap;">${esc(analyzerResult)}</div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn" onclick="openAnalyzer();" style="flex:1;padding:13px;background:#fff;border:1px solid #FDE68A;color:#B45309;font-size:13px;border-radius:12px;">🔄 重新拍摄</button>
-        <button class="btn" onclick="closeAnalyzer();" style="flex:1;padding:13px;background:#FCE7F3;border:1px solid #FBCFE8;color:#DB2777;font-size:13px;border-radius:12px;">✓ 开始练琴</button>
-      </div>`:''}
-    </div>
-  </div>`;
-}
-
-// ── Views ──
+// ══════════════════════════════════════════
+// 视图构建
+// ══════════════════════════════════════════
 function buildSetup(){
   return `<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
     <div style="text-align:center;margin-bottom:40px;">
@@ -366,7 +993,7 @@ function buildSetup(){
       <label style="display:block;font-size:11px;font-weight:700;color:#854D0E;letter-spacing:.06em;margin-bottom:8px;">你的名字是？</label>
       <input id="sn" type="text" placeholder="输入名字" maxlength="12" autocomplete="off"
         style="width:100%;background:#fff;border:1px solid #FDE68A;border-radius:14px;padding:14px 16px;font-size:18px;font-weight:700;color:#854D0E;outline:none;font-family:inherit;text-align:center;"
-        oninput="this.style.borderColor='#EAB308'" onkeydown="if(event.key==='Enter')doSetup()">
+        oninput="this.style.borderColor='#EAB308'">
       <button class="btn" onclick="doSetup()" style="width:100%;margin-top:16px;padding:15px;border-radius:14px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:16px;font-weight:800;">
         确定录入 🐣
       </button>
@@ -380,12 +1007,14 @@ function buildProfiles(){
   const list=AppStore.profiles.map(p=>{
     let lv=0;for(let i=0;i<XP_LEVELS.length;i++)if(p.eggXp>=XP_LEVELS[i])lv=i;
     const icon=EGG_STAGES[lv].includes('满级')?'✨':'🥚';
+    const recentLog=p.practiceLogs?.[0];
     return `<div style="display:flex;align-items:center;padding:16px 20px;gap:16px;margin-bottom:12px;" class="glass">
       <div data-pid="${p.id}" data-action="switch" style="cursor:pointer;display:flex;align-items:center;gap:16px;flex:1;">
         <div style="background:rgba(255,255,255,.8);width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 12px rgba(236,72,153,.15);flex-shrink:0;">${icon}</div>
         <div>
           <div style="font-size:18px;font-weight:800;color:#854D0E;">${esc(p.name)}</div>
           <div style="font-size:11px;color:#B45309;margin-top:2px;">Lv.${lv} · 战力 ${getProfilePower(p)}</div>
+          ${recentLog?`<div style="font-size:10px;color:#D97706;margin-top:1px;">最近：${esc(recentLog.pieceName)} (+${recentLog.xpEarned}XP)</div>`:''}
         </div>
       </div>
       <button data-pid="${p.id}" data-action="delete" style="background:none;border:none;color:#FCA5A5;font-size:18px;cursor:pointer;padding:4px 8px;border-radius:8px;">🗑</button>
@@ -404,6 +1033,11 @@ function buildHome(){
   const lv=eggLevel(),pct=xpPct(),max=eggMax(),anim=EGG_ANIMS[lv]||'anim-float';
   const last=S.collectedPets.length?petById(S.collectedPets[S.collectedPets.length-1].id):null;
   const tip=TIPS[new Date().getDate()%TIPS.length];
+  const recentLogs=(S.practiceLogs||[]).slice(0,3);
+  const todayLogs=(S.practiceLogs||[]).filter(l=>l.date===todayStr());
+  const todayMin=todayLogs.reduce((s,l)=>s+l.totalMin,0);
+  const todayXp=todayLogs.reduce((s,l)=>s+l.xpEarned,0);
+
   return `<div style="padding:20px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <div id="switch-profile-btn" style="cursor:pointer;display:flex;align-items:center;gap:8px;">
@@ -414,25 +1048,45 @@ function buildHome(){
         </div>
       </div>
       <div style="background:#FCE7F3;border:1px solid #FBCFE8;border-radius:12px;padding:6px 14px;display:flex;align-items:center;gap:6px;">
-        <span>🔥</span><span style="font-weight:800;color:#DB2777;font-size:14px;">${S.streak} 天连续</span>
+        <span>🔥</span><span style="font-weight:800;color:#DB2777;font-size:14px;">${S.streak} 天</span>
       </div>
     </div>
-    <div class="glass anim-glowpulse" style="border-radius:26px;padding:26px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;">
-      <div style="position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(234,179,8,.1),transparent);pointer-events:none;"></div>
-      <div style="margin-bottom:12px;">${buildEgg(lv,96,anim)}</div>
-      <div class="fredoka" style="font-size:20px;color:#EAB308;margin-bottom:2px;">${EGG_STAGES[lv]}</div>
-      <p style="color:#B45309;font-size:12px;margin-bottom:14px;">Lv.${lv} · ${S.eggXp} XP</p>
+
+    <!-- 蛋 -->
+    <div class="glass anim-glowpulse" style="border-radius:26px;padding:22px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;">
+      <div style="margin-bottom:10px;">${buildEgg(lv,90,anim)}</div>
+      <div class="fredoka" style="font-size:20px;color:#EAB308;">${EGG_STAGES[lv]}</div>
+      <p style="color:#B45309;font-size:12px;margin-bottom:12px;">Lv.${lv} · ${S.eggXp} XP</p>
       <div style="background:rgba(0,0,0,.05);border-radius:99px;height:8px;overflow:hidden;margin-bottom:5px;">
         <div class="progress-fill" style="width:${pct}%;"></div>
       </div>
       <p style="font-size:11px;color:#A8A29E;">${max?'✨ 满级！去练琴房孵化吧':'还需 '+(XP_LEVELS[lv+1]-S.eggXp)+' XP 升级'}</p>
       ${max?`<button id="go-hatch-btn" style="margin-top:12px;padding:11px 26px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:13px;font-weight:800;border-radius:12px;box-shadow:0 4px 12px rgba(236,72,153,.3);border:none;cursor:pointer;font-family:inherit;">✨ 去孵化！</button>`:''}
     </div>
+
+    <!-- 今日统计 -->
+    ${todayLogs.length>0?`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="glass" style="border-radius:14px;padding:12px;text-align:center;">
+        <div style="font-size:8px;color:#B45309;font-weight:700;">今日练习</div>
+        <div class="fredoka" style="font-size:22px;color:#EAB308;">${todayMin}分</div>
+      </div>
+      <div class="glass" style="border-radius:14px;padding:12px;text-align:center;">
+        <div style="font-size:8px;color:#B45309;font-weight:700;">今日XP</div>
+        <div class="fredoka" style="font-size:22px;color:#EC4899;">+${todayXp}</div>
+      </div>
+      <div class="glass" style="border-radius:14px;padding:12px;text-align:center;">
+        <div style="font-size:8px;color:#B45309;font-weight:700;">累计分钟</div>
+        <div class="fredoka" style="font-size:22px;color:#3B82F6;">${S.totalMinutes}</div>
+      </div>
+    </div>`:''}
+
+    <!-- 快捷入口 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
       <div class="glass" id="go-practice-btn" style="border-radius:16px;padding:16px;cursor:pointer;">
         <div style="font-size:28px;margin-bottom:5px;">🎹</div>
         <div style="font-weight:800;font-size:13px;color:#854D0E;">开始练琴</div>
-        <div style="font-size:10px;color:#B45309;margin-top:2px;">获得 XP</div>
+        <div style="font-size:10px;color:#B45309;margin-top:2px;">节拍器计XP</div>
       </div>
       <div class="glass" id="go-game-btn" style="border-radius:16px;padding:16px;cursor:pointer;">
         <div style="font-size:28px;margin-bottom:5px;">🎮</div>
@@ -440,119 +1094,45 @@ function buildHome(){
         <div style="font-size:10px;color:#B45309;margin-top:2px;">最高 ${S.gameHighScore} 分</div>
       </div>
     </div>
+
+    <!-- 最近练习记录 -->
+    ${recentLogs.length>0?`
+    <div class="glass" style="border-radius:16px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:#B45309;">📋 最近练习</div>
+        <button id="go-stats-btn" style="font-size:10px;color:#D97706;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;">查看全部 →</button>
+      </div>
+      ${recentLogs.map(log=>`
+        <div class="practice-log-item">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#854D0E;">${esc(log.pieceName)}</div>
+              <div style="font-size:10px;color:#B45309;margin-top:1px;">${log.date} · ${log.totalMin}分钟 · 完成${(log.phases||[]).filter(p=>p.done).length}/3阶段</div>
+            </div>
+            <div style="font-weight:800;color:#EC4899;font-size:13px;">+${log.xpEarned}XP</div>
+          </div>
+        </div>`).join('')}
+    </div>`:`
+    <div class="glass" style="border-radius:16px;padding:14px;text-align:center;margin-bottom:12px;">
+      <p style="color:#B45309;font-size:12px;">还没有练习记录，快去开始吧！</p>
+    </div>`}
+
     ${last?`
     <div class="glass" style="border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:12px;">
       <div style="font-size:40px;flex-shrink:0;">${last.emoji}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:9px;font-weight:700;color:#B45309;margin-bottom:2px;">最新收集</div>
-        <div style="font-weight:800;font-size:14px;color:#854D0E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(last.name)}</div>
+        <div style="font-weight:800;font-size:14px;color:#854D0E;">${esc(last.name)}</div>
         <span class="rarity-${last.rarity}" style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;display:inline-block;margin-top:3px;">${last.rarity.toUpperCase()}</span>
       </div>
       <button id="go-dex-btn" style="padding:7px 12px;background:#FCE7F3;border:1px solid #FBCFE8;color:#DB2777;font-size:11px;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:700;">图鉴</button>
-    </div>`:
-    `<div class="glass" style="border-radius:16px;padding:14px;text-align:center;margin-bottom:12px;"><p style="color:#B45309;font-size:12px;">还没有宠物，快去练琴孵化蛋吧！</p></div>`}
+    </div>`:''}
+
     <div style="padding:12px 14px;border-radius:14px;background:#FEF3C7;border:1px solid #FDE68A;">
       <div style="font-size:10px;font-weight:700;color:#D97706;margin-bottom:3px;">💡 今日建议</div>
       <div style="font-size:12px;color:#A16207;line-height:1.6;">${tip}</div>
     </div>
   </div>`;
-}
-
-function buildPractice(){
-  if(!S)return'';
-  const lv=eggLevel(),max=eggMax(),pct=xpPct(),anim=EGG_ANIMS[lv]||'anim-float';
-  return `<div style="padding:16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h2 class="fredoka" style="font-size:22px;color:#EAB308;">🎹 练琴房</h2>
-      ${combo>0?`<div style="background:#FCE7F3;border:1px solid #FBCFE8;border-radius:10px;padding:4px 12px;font-size:12px;font-weight:800;color:#DB2777;">🔥 ${combo} 连击</div>`:''}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
-      <div class="glass" style="border-radius:14px;padding:11px;text-align:center;">
-        <div style="font-size:9px;color:#B45309;font-weight:700;margin-bottom:2px;">本次时长</div>
-        <div class="fredoka" style="font-size:22px;color:#854D0E;" id="pt">${fmtTime(practiceSeconds)}</div>
-      </div>
-      <div class="glass" style="border-radius:14px;padding:11px;text-align:center;">
-        <div style="font-size:9px;color:#B45309;font-weight:700;margin-bottom:2px;">总分钟</div>
-        <div class="fredoka" style="font-size:22px;color:#EAB308;">${S.totalMinutes}</div>
-      </div>
-      <div class="glass" style="border-radius:14px;padding:11px;text-align:center;">
-        <div style="font-size:9px;color:#B45309;font-weight:700;margin-bottom:2px;">蛋 XP</div>
-        <div class="fredoka" style="font-size:22px;color:#EC4899;">${S.eggXp}</div>
-      </div>
-    </div>
-    <div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:#B45309;margin-bottom:3px;">
-        <span>Lv.${lv} ${EGG_STAGES[lv]}</span>
-        <span>${max?'满级':`${S.eggXp}/${XP_LEVELS[lv+1]}`}</span>
-      </div>
-      <div style="height:7px;background:rgba(0,0,0,.05);border-radius:99px;overflow:hidden;">
-        <div class="progress-fill" style="width:${pct}%;"></div>
-      </div>
-    </div>
-    <div class="glass" style="border-radius:16px;padding:11px 14px;margin-bottom:11px;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:16px;">🎵</span>
-      <button class="btn" onclick="changeBpm(-5)" style="width:30px;height:30px;background:#fff;border:1px solid #FDE68A;color:#854D0E;font-size:16px;border-radius:8px;flex-shrink:0;">−</button>
-      <div style="flex:1;text-align:center;"><span class="fredoka" style="font-size:20px;color:#854D0E;">${S.settings.bpm}</span><span style="font-size:9px;color:#D97706;margin-left:2px;">BPM</span></div>
-      <button class="btn" onclick="changeBpm(5)" style="width:30px;height:30px;background:#fff;border:1px solid #FDE68A;color:#854D0E;font-size:16px;border-radius:8px;flex-shrink:0;">+</button>
-      <button class="btn" onclick="toggleMetro()" style="padding:7px 11px;font-size:11px;font-weight:700;border-radius:10px;flex-shrink:0;
-        background:${metroOn?'#FEE2E2':'#FEF3C7'};border:1px solid ${metroOn?'#FCA5A5':'#FDE68A'};color:${metroOn?'#EF4444':'#D97706'};">
-        ${metroOn?'⏹ 停':'▶ 节拍器'}
-      </button>
-    </div>
-    <div style="margin-bottom:11px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-weight:700;font-size:12px;color:#854D0E;">📄 曲谱</span>
-        <label style="cursor:pointer;padding:5px 11px;border-radius:9px;background:#FEF3C7;border:1px solid #FDE68A;font-size:10px;font-weight:700;color:#D97706;">
-          ${sheetData?'换一份':'+ 导入'}
-          <input type="file" accept="image/*,application/pdf" style="display:none;" onchange="loadSheet(event)">
-        </label>
-      </div>
-      ${sheetData?`
-        <div style="position:relative;border-radius:13px;overflow:hidden;height:190px;">
-          ${sheetData.type.startsWith('image/')?`<img src="${sheetData.url}" style="width:100%;height:100%;object-fit:contain;background:#fff;">`:`<iframe src="${sheetData.url}" style="width:100%;height:100%;border:none;background:#fff;"></iframe>`}
-          <button class="btn" onclick="clearSheet()" style="position:absolute;top:6px;right:6px;padding:3px 9px;background:rgba(133,77,14,.6);color:#fff;border-radius:8px;font-size:10px;">✕</button>
-          <div style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,.95);border-radius:7px;padding:2px 8px;font-size:9px;font-weight:700;color:#D97706;max-width:55%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(sheetName)}</div>
-        </div>`:
-        `<div style="height:64px;border-radius:13px;background:rgba(0,0,0,.03);border:2px dashed rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;gap:7px;">
-          <span style="font-size:16px;">🎼</span><span style="font-size:11px;color:#B45309;">导入曲谱图片或PDF，边看谱边练</span>
-        </div>`}
-    </div>
-    <div class="glass" style="border-radius:18px;padding:18px;text-align:center;margin-bottom:11px;">
-      ${max?`
-        <div style="margin-bottom:8px;">${buildEgg(4,60,'anim-crack')}</div>
-        <p style="font-weight:800;color:#EC4899;margin-bottom:10px;">✨ 蛋已满级！</p>
-        <button class="btn" onclick="doHatch()" style="width:100%;padding:14px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:14px;font-weight:800;border-radius:15px;box-shadow:0 6px 18px rgba(236,72,153,.3);">开盲盒 🎁</button>`:
-        `<div style="margin-bottom:8px;">${buildEgg(lv,60,anim)}</div>
-        <button class="btn" onclick="togglePractice()" style="width:100%;padding:14px;border-radius:15px;font-size:15px;font-weight:800;
-          background:${isPracticing?'linear-gradient(135deg,#EF4444,#DC2626)':'linear-gradient(135deg,#EAB308,#EC4899)'};
-          color:#fff;box-shadow:${isPracticing?'0 6px 18px rgba(239,68,68,.3)':'0 6px 18px rgba(236,72,153,.3)'};">
-          ${isPracticing?'⏸ 暂停练习':'▶ 专注练琴'}
-        </button>
-        ${isPracticing?`<p style="margin-top:6px;font-size:10px;color:#B45309;">每5分钟 +5 XP · 手型检查通过获连击加成</p>`:''}`}
-    </div>
-    <div class="glass" style="border-radius:15px;overflow:hidden;margin-bottom:11px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;">
-        <span style="font-weight:700;font-size:12px;color:#854D0E;">📷 手型镜</span>
-        <div style="display:flex;gap:6px;">
-          ${camOn?`<button class="btn" onclick="switchPracticeCamera()" style="padding:5px 9px;background:rgba(0,0,0,.04);border:1px solid #FDE68A;font-size:10px;font-weight:700;color:#D97706;border-radius:8px;">🔄 翻转</button>`:''}
-          <button class="btn" onclick="toggleCamera()" style="padding:5px 11px;background:#fff;border:1px solid #FDE68A;font-size:10px;font-weight:700;color:#D97706;border-radius:8px;">${camOn?'关闭':'开启'}</button>
-        </div>
-      </div>
-      ${camOn?`<div style="height:180px;background:#FDE68A;"><video id="cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;transform:${camFacing==='user'?'scaleX(-1)':'none'};"></video></div>`:
-      `<div style="padding:8px 13px 12px;font-size:11px;color:#B45309;text-align:center;">开启后用余光检查手型和坐姿</div>`}
-    </div>
-    <button class="btn" onclick="openAnalyzer()" style="width:100%;padding:13px;background:linear-gradient(135deg,#EAB308,#EC4899);color:#fff;font-size:13px;font-weight:800;border-radius:14px;margin-top:2px;">
-      🎼 AI 识谱助手 <span style="font-size:10px;opacity:.75;font-weight:600;">（拍照分析难点）</span>
-    </button>
-  </div>
-  ${showPosture?`<div style="position:fixed;inset:0;z-index:90;pointer-events:none;display:flex;align-items:center;justify-content:center;">
-    <div class="anim-popin" style="background:rgba(236,72,153,.92);backdrop-filter:blur(12px);padding:18px 34px;border-radius:99px;text-align:center;border:3px solid rgba(255,255,255,.3);color:#fff;">
-      <div style="font-size:40px;">👀</div>
-      <div style="font-size:19px;font-weight:900;margin-top:2px;">检查手型！</div>
-      <div style="font-size:11px;opacity:.8;margin-top:2px;">手心握苹果，手腕别紧绷</div>
-    </div>
-  </div>`:''}
-  ${buildAnalyzerOverlay()}`;
 }
 
 function buildGameIdle(){
@@ -562,10 +1142,7 @@ function buildGameIdle(){
     <p style="font-size:12px;color:#B45309;margin-bottom:18px;">音符落到底部时，点击对应彩色按键！</p>
     <div class="glass" style="border-radius:16px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
       <div style="font-size:40px;">🏆</div>
-      <div>
-        <div style="font-size:10px;color:#B45309;font-weight:700;">历史最高分</div>
-        <div class="fredoka" style="font-size:32px;color:#EC4899;">${S.gameHighScore}</div>
-      </div>
+      <div><div style="font-size:10px;color:#B45309;font-weight:700;">历史最高分</div><div class="fredoka" style="font-size:32px;color:#EC4899;">${S.gameHighScore}</div></div>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:7px;">选择曲目</div>
@@ -585,13 +1162,8 @@ function buildGameIdle(){
 function buildGamePlaying(){
   return `<div style="height:calc(100dvh - 80px - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;overflow:hidden;">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;flex-shrink:0;">
-      <div>
-        <div style="font-size:8px;color:#B45309;font-weight:700;">SCORE</div>
-        <div class="fredoka" style="font-size:26px;color:#EAB308;" id="gscore">${gameScore}</div>
-      </div>
-      <div style="text-align:center;min-width:56px;">
-        <div class="fredoka" style="font-size:20px;color:#EC4899;" id="gcombo"></div>
-      </div>
+      <div><div style="font-size:8px;color:#B45309;font-weight:700;">SCORE</div><div class="fredoka" style="font-size:26px;color:#EAB308;" id="gscore">${gameScore}</div></div>
+      <div style="text-align:center;min-width:56px;"><div class="fredoka" style="font-size:20px;color:#EC4899;" id="gcombo"></div></div>
       <button class="btn" onclick="endGame()" style="padding:6px 12px;background:#FEE2E2;border:1px solid #FCA5A5;color:#EF4444;font-size:11px;border-radius:9px;">结束</button>
     </div>
     <div id="fall-zone" style="flex:1;background:linear-gradient(to bottom,rgba(0,0,0,.02),rgba(0,0,0,.06));position:relative;overflow:hidden;">
@@ -609,7 +1181,6 @@ function buildGamePlaying(){
     </div>
   </div>`;
 }
-
 
 function buildGameResult(){
   const hi=S&&gameScore>=S.gameHighScore&&gameScore>0;
@@ -675,7 +1246,7 @@ function buildPKArena(){
     return `<div class="glass" style="flex:1;padding:16px;text-align:center;border-radius:20px;">
       <select id="${sid}" style="width:100%;padding:8px;border-radius:10px;border:1px solid rgba(234,179,8,.25);font-weight:800;font-size:14px;color:#854D0E;margin-bottom:12px;background:rgba(255,255,255,.6);outline:none;">${opts}</select>
       <div style="font-size:52px;height:70px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">${best?best.emoji:'🥚'}</div>
-      <div style="font-size:10px;color:#B45309;font-weight:700;">最强幻兽: ${best?esc(best.name):'无'}</div>
+      <div style="font-size:10px;color:#B45309;font-weight:700;">最强：${best?esc(best.name):'无'}</div>
       <div style="background:rgba(0,0,0,.04);border-radius:12px;padding:8px;margin-top:12px;">
         <div style="font-size:9px;color:#B45309;margin-bottom:2px;">总战力</div>
         <div class="fredoka" style="font-size:24px;color:#EC4899;">${pw}</div>
@@ -708,20 +1279,87 @@ function buildStats(){
   let cal=['日','一','二','三','四','五','六'].map(d=>`<div style="text-align:center;font-size:9px;font-weight:700;color:#B45309;">${d}</div>`).join('');
   for(let i=0;i<fd;i++)cal+=`<div class="cal-day cal-empty"></div>`;
   for(let d=1;d<=dim;d++){const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;cal+=`<div class="cal-day ${S.checkinDays.includes(ds)?'cal-done':'cal-empty'} ${d===td?'cal-today':''}">${d}</div>`;}
-  const ms=[['第一次练琴',S.totalMinutes>0],['练习满30分钟',S.totalMinutes>=30],['练习满100分钟',S.totalMinutes>=100],['收集第1只宠物',S.collectedPets.length>=1],['收集5只宠物',[...new Set(S.collectedPets.map(p=>p.id))].length>=5],['连续练琴3天',S.streak>=3],['连续练琴7天',S.streak>=7],['游戏得分超500',S.gameHighScore>=500],['获得稀有宠物',S.collectedPets.some(p=>['rare','epic','legend'].includes(petById(p.id)?.rarity))],['获得史诗宠物',S.collectedPets.some(p=>['epic','legend'].includes(petById(p.id)?.rarity))]];
+
+  const logs=S.practiceLogs||[];
+  const totalEffMin=S.totalMinutes||0;
+  const totalRawMin=S.totalRawMinutes||0;
+  const metroRate=totalRawMin>0?Math.round((totalEffMin/totalRawMin)*100):0;
+
+  // 按曲目统计
+  const byPiece={};
+  logs.forEach(l=>{
+    if(!byPiece[l.pieceName])byPiece[l.pieceName]={count:0,minutes:0,xp:0};
+    byPiece[l.pieceName].count++;
+    byPiece[l.pieceName].minutes+=l.totalMin;
+    byPiece[l.pieceName].xp+=l.xpEarned;
+  });
+  const pieces=Object.entries(byPiece).sort((a,b)=>b[1].minutes-a[1].minutes).slice(0,5);
+
+  const ms=[['第一次练琴',S.totalRawMinutes>0],['有效练习10分钟',totalEffMin>=10],['有效练习60分钟',totalEffMin>=60],['完成一次完整演奏阶段',logs.some(l=>(l.phases||[]).find(p=>p.id==='complete'&&p.done))],['收集第1只宠物',S.collectedPets.length>=1],['收集5只宠物',[...new Set(S.collectedPets.map(p=>p.id))].length>=5],['连续练琴3天',S.streak>=3],['连续练琴7天',S.streak>=7],['完成AI任务5次',logs.reduce((s,l)=>s+(l.aiTasksDone||0),0)>=5],['获得稀有宠物',S.collectedPets.some(p=>['rare','epic','legend'].includes(petById(p.id)?.rarity))]];
+
   return `<div style="padding:16px;">
     <h2 class="fredoka" style="font-size:22px;color:#EC4899;margin-bottom:13px;">📊 练琴记录</h2>
+
+    <!-- 核心数据 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px;">
-      ${[['🔥','#EAB308',S.streak,'连续天数'],['⏱','#EC4899',S.totalMinutes,'累计分钟'],['🏆','#DB2777',S.gameHighScore,'游戏最高'],['🐾','#EAB308',S.collectedPets.length,'收集宠物']].map(([ico,col,val,lab])=>`<div class="glass" style="border-radius:15px;padding:14px;text-align:center;"><div style="font-size:26px;margin-bottom:3px;">${ico}</div><div class="fredoka" style="font-size:28px;color:${col};">${val}</div><div style="font-size:9px;color:#B45309;font-weight:700;">${lab}</div></div>`).join('')}
+      ${[['🔥','#EAB308',S.streak,'连续天数'],['⏱','#3B82F6',totalEffMin,'有效分钟'],['📊','#10B981',metroRate+'%','节拍器使用率'],['🐾','#EC4899',S.collectedPets.length,'收集宠物']].map(([ico,col,val,lab])=>`<div class="glass" style="border-radius:15px;padding:14px;text-align:center;"><div style="font-size:26px;margin-bottom:3px;">${ico}</div><div class="fredoka" style="font-size:28px;color:${col};">${val}</div><div style="font-size:9px;color:#B45309;font-weight:700;">${lab}</div></div>`).join('')}
     </div>
+
+    <!-- 节拍器使用率说明 -->
+    <div style="background:#E0F2FE;border:1px solid #BAE6FD;border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:#0284C7;">
+      📊 节拍器使用率 = 有效练习 ${totalEffMin} 分钟 ÷ 总练习 ${totalRawMin} 分钟<br>
+      <span style="opacity:.8;">越高说明你练琴越专注、越规律</span>
+    </div>
+
+    <!-- 打卡日历 -->
     <div class="glass" style="border-radius:15px;padding:13px;margin-bottom:12px;">
       <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:9px;">📅 本月打卡</div>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">${cal}</div>
     </div>
+
+    <!-- 曲目练习统计 -->
+    ${pieces.length>0?`
+    <div class="glass" style="border-radius:15px;padding:13px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:9px;">🎵 练习的曲目</div>
+      ${pieces.map(([name,data])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #FEF3C7;">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#854D0E;">${esc(name)}</div>
+            <div style="font-size:10px;color:#B45309;">练了 ${data.count} 次 · ${data.minutes} 分钟</div>
+          </div>
+          <div style="font-weight:800;color:#EC4899;font-size:12px;">+${data.xp} XP</div>
+        </div>`).join('')}
+    </div>`:''}
+
+    <!-- 练习记录列表 -->
+    ${logs.length>0?`
+    <div class="glass" style="border-radius:15px;padding:13px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:9px;">📋 最近20次记录</div>
+      ${logs.slice(0,20).map(log=>{
+        const phases=log.phases||[];
+        const donePh=phases.filter(p=>p.done).length;
+        return `<div class="practice-log-item">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#854D0E;">${esc(log.pieceName)}</div>
+              <div style="font-size:10px;color:#B45309;margin-top:2px;">${log.date} · ${log.totalMin}分钟</div>
+              <div style="display:flex;gap:3px;margin-top:4px;">
+                ${PHASES.map((ph,i)=>{const pd=phases[i];return`<span style="font-size:9px;padding:1px 6px;border-radius:5px;background:${pd?.done?ph.color:'rgba(0,0,0,.06)'};color:${pd?.done?'#fff':'#B45309'};">${ph.icon}</span>`}).join('')}
+                ${log.aiTasksDone?`<span style="font-size:9px;padding:1px 6px;border-radius:5px;background:rgba(139,92,246,.15);color:#7C3AED;">AI×${log.aiTasksDone}</span>`:''}
+              </div>
+            </div>
+            <div style="font-weight:800;color:#EC4899;font-size:13px;flex-shrink:0;">+${log.xpEarned}XP</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+
+    <!-- 成就 -->
     <div class="glass" style="border-radius:15px;padding:13px;margin-bottom:13px;">
       <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:9px;">🎯 成就</div>
       ${ms.map(([l,d])=>`<div style="display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #FEF3C7;"><span style="font-size:13px;">${d?'✅':'⬜'}</span><span style="font-size:11px;font-weight:600;color:${d?'#854D0E':'#D97706'};">${l}</span></div>`).join('')}
     </div>
+
     <div style="text-align:center;">
       <button class="btn" id="reset-btn" style="padding:8px 18px;background:#FEE2E2;border:1px solid #FCA5A5;color:#EF4444;font-size:11px;border-radius:9px;">重置当前档案数据</button>
     </div>
@@ -734,13 +1372,21 @@ function buildTabBar(){
   return `<div class="tab-inner">${tabs.map(t=>`<div class="tab-item ${currentView===t.id?'active':''}" data-nav="${t.id}" style="cursor:pointer;"><span class="tab-icon">${t.icon}</span><span class="tab-label">${t.label}</span></div>`).join('')}</div>`;
 }
 
-// ── Render ──
+// ══════════════════════════════════════════
+// 渲染 & 事件绑定
+// ══════════════════════════════════════════
 function render(){
   const vc=document.getElementById('view-content'),tb=document.getElementById('tab-bar');
   if(currentView==='setup'){vc.innerHTML=buildSetup();tb.innerHTML='';bindSetupEvents();return}
   if(currentView==='profiles'){vc.innerHTML=buildProfiles();tb.innerHTML='';bindProfilesEvents();return}
-  const map={home:buildHome,practice:buildPractice,dex:buildDex,pk:buildPKArena,stats:buildStats,
-    game:()=>gameState==='playing'?buildGamePlaying():gameState==='result'?buildGameResult():buildGameIdle()};
+  const map={
+    home:buildHome,
+    practice:buildPractice,
+    dex:buildDex,
+    pk:buildPKArena,
+    stats:buildStats,
+    game:()=>gameState==='playing'?buildGamePlaying():gameState==='result'?buildGameResult():buildGameIdle()
+  };
   vc.innerHTML=(map[currentView]||buildHome)();
   tb.innerHTML=buildTabBar();
   afterRender();
@@ -748,36 +1394,29 @@ function render(){
 
 function bindSetupEvents(){
   const inp=document.getElementById('sn');
-  if(inp){inp.addEventListener('keydown',e=>{if(e.key==='Enter')doSetup();});}
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')doSetup();});
 }
-
 function bindProfilesEvents(){
-  const vc=document.getElementById('view-content');
-  if(!vc)return;
-  // Profile list: switch or delete
+  const vc=document.getElementById('view-content');if(!vc)return;
   vc.addEventListener('click',e=>{
-    const sw=e.target.closest('[data-action="switch"]');
-    if(sw){switchProfile(sw.dataset.pid);return;}
-    const del=e.target.closest('[data-action="delete"]');
-    if(del){deleteProfile(del.dataset.pid);return;}
+    const sw=e.target.closest('[data-action="switch"]');if(sw){switchProfile(sw.dataset.pid);return;}
+    const del=e.target.closest('[data-action="delete"]');if(del){deleteProfile(del.dataset.pid);return;}
     if(e.target.id==='add-profile-btn')navigate('setup');
   });
 }
 
 function afterRender(){
-  // Tab bar delegation
   const tb=document.getElementById('tab-bar');
   if(tb)tb.addEventListener('click',e=>{const el=e.target.closest('[data-nav]');if(el)navigate(el.dataset.nav);});
 
   if(currentView==='home'){
-    const vc=document.getElementById('view-content');
-    if(!vc)return;
-    const q=id=>vc.querySelector('#'+id);
-    const on=(id,fn)=>{const el=q(id);if(el)el.addEventListener('click',fn);};
+    const vc=document.getElementById('view-content');if(!vc)return;
+    const on=(id,fn)=>{const el=vc.querySelector('#'+id);if(el)el.addEventListener('click',fn);};
     on('switch-profile-btn',()=>navigate('profiles'));
     on('go-practice-btn',()=>navigate('practice'));
     on('go-game-btn',()=>navigate('game'));
     on('go-dex-btn',()=>navigate('dex'));
+    on('go-stats-btn',()=>navigate('stats'));
     on('go-hatch-btn',()=>navigate('practice'));
   }
   if(currentView==='practice')afterPracticeRender();
@@ -785,7 +1424,6 @@ function afterRender(){
     if(gameState==='playing')bindGameKeys();
     const b=document.getElementById('back-to-idle');
     if(b)b.addEventListener('click',()=>{gameState='idle';render();});
-    // Song selection in idle state
     if(gameState==='idle'){
       document.querySelectorAll('[data-song]').forEach(el=>{
         el.addEventListener('click',()=>{gameSong=parseInt(el.dataset.song);render();});
@@ -806,15 +1444,19 @@ function afterRender(){
       const fresh=createProfile(S.name);fresh.id=S.id;
       const idx=AppStore.profiles.findIndex(p=>p.id===S.id);
       if(idx>=0){AppStore.profiles[idx]=fresh;S=fresh;}
-      practiceSeconds=0;combo=0;sheetData=null;sheetName='';gameState='idle';save();navigate('home');
+      practiceState.sessionStarted=false;save();navigate('home');
     });
   }
 }
-function resetAll(){stopPractice();if(metroOn)stopMetro();if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;camOn=false;}localStorage.removeItem('piano_pet_v5');AppStore={profiles:[],activeId:null};S=null;practiceSeconds=0;combo=0;sheetData=null;sheetName='';gameState='idle';pkState='idle';currentView='setup';render()}
 
-Object.assign(window,{navigate,doSetup,switchProfile,deleteProfile,togglePractice,changeBpm,toggleMetro,
-  toggleCamera,switchPracticeCamera,loadSheet,clearSheet,doHatch,selectSong,startGame,endGame,hitLane,
-  startPK,openAnalyzer,closeAnalyzer,captureAndAnalyze,switchAnalyzerCamera,eggInteract,resetAll});
+// ── 全局暴露 ──
+Object.assign(window,{
+  navigate,doSetup,switchProfile,deleteProfile,
+  doStartSession,toggleMetroPractice,changeBpm,completePhase,finishSession,completeAiTask,doHatch,
+  loadSheet,clearSheet,toggleCamera,switchPracticeCamera,
+  openAnalyzer,closeAnalyzer,captureAndAnalyze,switchAnalyzerCamera,applyAiAndStart,
+  selectSong,startGame,endGame,hitLane,startPK,eggInteract,
+});
 render();
 </script>
 </body>
