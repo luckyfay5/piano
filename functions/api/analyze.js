@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
     const bodyText = await request.text();
     
     // 调用通义千问的视觉大模型接口 (兼容 OpenAI 模式)
-    const response = await fetch('https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation', {
+    const response = await fetch('https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
