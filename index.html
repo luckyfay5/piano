@@ -308,7 +308,7 @@ async function captureAndAnalyze(){
     analyzerResult=data.candidates?.[0]?.content?.parts?.[0]?.text||'分析失败，API 返回数据中没有文本内容。';
     analyzerState='done';
   }catch(e){
-    analyzerResult='出错了：\n'+e.message+'\n\n💡 排查建议：\n1. 若提示 API 请求失败，请检查 Netlify 的 GEMINI_API_KEY 是否填错或过期。\n2. 若提示响应格式异常 (HTTP 404)，请检查 GitHub 中是否正确创建了 netlify/functions/analyze.js 文件。';
+    analyzerResult='出错了：\n'+e.message+'\n\n💡 排查建议：\n1. 若提示 API 请求失败，请检查 cloudflare 的 GEMINI_API_KEY 是否填错或过期。\n2. 若提示响应格式异常 (HTTP 404)，请检查 GitHub 中是否正确创建了 functions/api/analyze.js 文件。';
     analyzerState='error';
   }
   refreshPractice();
