@@ -291,7 +291,7 @@ async function captureAndAnalyze(){
   if(analyzerStream){analyzerStream.getTracks().forEach(t=>t.stop());analyzerStream=null;}
   analyzerState='analyzing';refreshPractice();
   try{
-    const resp=await fetch('/.netlify/functions/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[
         {text:'你是一个耐心温柔的儿童钢琴老师。请分析这张钢琴乐谱的照片，用10岁孩子能懂的语言，分点说明：\n1. 调号和拍号是什么，用通俗的话解释\n2. 这首曲子的情绪和弹奏感觉\n3. 有哪2-3个需要特别注意的难点（比如跨手、连线、快速音群）\n4. 给孩子一句鼓励的话\n如果照片里没有清晰的五线谱，请温和地说明并请孩子重新拍摄。回答请简洁，不超过150字。'},
         {inlineData:{mimeType:'image/jpeg',data:b64}}
