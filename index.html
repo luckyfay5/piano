@@ -292,10 +292,16 @@ async function captureAndAnalyze(){
   analyzerState='analyzing';refreshPractice();
   try{
     const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[
-        {text:'你是一个耐心温柔的儿童钢琴老师。请分析这张钢琴乐谱的照片，用10岁孩子能懂的语言，分点说明：\n1. 调号和拍号是什么，用通俗的话解释\n2. 这首曲子的情绪和弹奏感觉\n3. 有哪2-3个需要特别注意的难点（比如跨手、连线、快速音群）\n4. 给孩子一句鼓励的话\n如果照片里没有清晰的五线谱，请温和地说明并请孩子重新拍摄。回答请简洁，不超过150字。'},
-        {inlineData:{mimeType:'image/jpeg',data:b64}}
-      ]}]})
+      body:JSON.stringify({
+        model: "qwen-vl-plus", // 使用通义千问视觉大模型
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: "你是一个耐心温柔的儿童钢琴老师。请分析这张钢琴乐谱的照片，用10岁孩子能懂的语言，分点说明：\n1. 调号和拍号是什么，用通俗的话解释\n2. 这首曲子的情绪和弹奏感觉\n3. 有哪2-3个需要特别注意的难点（比如跨手、连线、快速音群）\n4. 给孩子一句鼓励的话\n如果照片里没有清晰的五线谱，请温和地说明并请孩子重新拍摄。回答请简洁，不超过150字。" },
+            { type: "image_url", image_url: { url: `data:image/jpeg;base64,${b64}` } }
+          ]
+        }]
+      })
     }).catch(err=>{throw new Error('网络连接失败或后端接口不可达：'+err.message);});
     const rawText=await resp.text();
     let data;
@@ -305,10 +311,10 @@ async function captureAndAnalyze(){
       const errMsg=data.error&&typeof data.error==='object'?data.error.message||JSON.stringify(data.error):data.error;
       throw new Error('API 请求失败 (HTTP '+resp.status+')：'+(errMsg||'未知错误'));
     }
-    analyzerResult=data.candidates?.[0]?.content?.parts?.[0]?.text||'分析失败，API 返回数据中没有文本内容。';
+    analyzerResult=data.choices?.[0]?.message?.content||'分析失败，API 返回数据中没有文本内容。';
     analyzerState='done';
   }catch(e){
-    analyzerResult='出错了：\n'+e.message+'\n\n💡 排查建议：\n1. 若提示 API 请求失败，请检查 cloudflare 的 GEMINI_API_KEY 是否填错或过期。\n2. 若提示响应格式异常 (HTTP 404)，请检查 GitHub 中是否正确创建了 functions/api/analyze.js 文件。';
+    analyzerResult='出错了：\n'+e.message+'\n\n💡 排查建议：\n1. 请检查 Cloudflare 的环境变量 DASHSCOPE_API_KEY 是否填错或过期。\n2. 确保已重新触发部署。';
     analyzerState='error';
   }
   refreshPractice();
@@ -318,7 +324,7 @@ function buildAnalyzerOverlay(){
   const isC=analyzerState==='capturing',isA=analyzerState==='analyzing',isD=analyzerState==='done'||analyzerState==='error';
   return `<div style="position:fixed;inset:0;z-index:95;background:rgba(255,251,235,.97);display:flex;flex-direction:column;">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.06);">
-      <div><div class="fredoka" style="font-size:18px;color:#EC4899;">🎼 AI 识谱助手</div><div style="font-size:11px;color:#B45309;">由 Gemini 驱动</div></div>
+      <div><div class="fredoka" style="font-size:18px;color:#EC4899;">🎼 AI 识谱助手</div><div style="font-size:11px;color:#B45309;">由 通义千问 驱动</div></div>
       <div style="display:flex;gap:8px;">
         ${isC?`<button class="btn" onclick="switchAnalyzerCamera()" style="padding:8px 12px;background:rgba(0,0,0,.04);color:#B45309;font-size:12px;border-radius:10px;border:1px solid rgba(0,0,0,.06);">🔄 翻转</button>`:''}
         <button class="btn" onclick="closeAnalyzer()" style="padding:8px 14px;background:#FEF3C7;color:#854D0E;font-size:12px;border-radius:10px;">✕ 关闭</button>
